@@ -22,17 +22,6 @@
     return Math.hypot((b[0] - a[0]) * KX, (b[1] - a[1]) * KY);
   }
 
-  // Direction au début et à la fin d'un morceau (en ignorant les points confondus)
-  function capDebut(coords) {
-    for (let k = 1; k < coords.length; k++) if (distance(coords[0], coords[k]) > 2) return cap(coords[0], coords[k]);
-    return null;
-  }
-  function capFin(coords) {
-    const n = coords.length - 1;
-    for (let k = n - 1; k >= 0; k--) if (distance(coords[k], coords[n]) > 2) return cap(coords[k], coords[n]);
-    return null;
-  }
-
   function ordinal(n) {
     return n === 1 ? '1re' : n + 'e';
   }
@@ -58,6 +47,18 @@
       });
     });
     const total = cumul[cumul.length - 1] || 0;
+
+    // Point situé à une distance donnée depuis le début du trajet
+    function pointA(d) {
+      d = Math.max(0, Math.min(total, d));
+      let bas = 0, haut = cumul.length - 1;
+      while (bas < haut - 1) {
+        const milieu = (bas + haut) >> 1;
+        if (cumul[milieu] <= d) bas = milieu; else haut = milieu;
+      }
+      const l = cumul[haut] - cumul[bas] || 1, f = (d - cumul[bas]) / l;
+      return [points[bas][0] + (points[haut][0] - points[bas][0]) * f, points[bas][1] + (points[haut][1] - points[bas][1]) * f];
+    }
 
     const consignes = [];
     for (let i = 1; i < morceaux.length; i++) {
@@ -86,8 +87,9 @@
       if (b.rondPoint) continue;
       // Simple virage de la route, sans autre choix possible : pas de consigne
       if (a.continuations < 2) continue;
-      const c1 = capFin(a.coords), c2 = capDebut(b.coords);
-      if (c1 == null || c2 == null) continue;
+      // Direction 25 m avant et 25 m après le carrefour (un virage peut se faire par une petite bretelle)
+      const c1 = cap(pointA(pos - 25), point), c2 = cap(point, pointA(pos + 25));
+      if (distance(pointA(pos - 25), point) < 3 || distance(point, pointA(pos + 25)) < 3) continue;
       const angle = ecartAngle(c1, c2), absolu = Math.abs(angle);
       if (absolu < 25) continue; // tout droit
       const cote = angle > 0 ? 'droite' : 'gauche';
@@ -96,6 +98,14 @@
       else if (absolu < 135) { force = 'normal'; titre = 'Tournez à ' + cote; }
       else { force = 'serre'; titre = 'Tournez franchement à ' + cote; }
       consignes.push({ type: 'virage', cote, force, pos, point, titre, rue: b.nom });
+    }
+    // Un même virage vu à deux carrefours très proches (petite bretelle) : on ne l'annonce qu'une fois
+    for (let k = consignes.length - 1; k > 0; k--) {
+      const x = consignes[k - 1], y = consignes[k];
+      if (x.type === 'virage' && y.type === 'virage' && y.pos - x.pos < 30 && x.cote === y.cote) {
+        x.rue = y.rue || x.rue;
+        consignes.splice(k, 1);
+      }
     }
     consignes.push({ type: 'arrivee', pos: total, point: points[points.length - 1],
       titre: 'Arrivée', rue: nomDestination || '' });
