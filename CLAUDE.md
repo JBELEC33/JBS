@@ -103,6 +103,14 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 
 À la fin de chaque étape : résumé de ce qui marche, de ce qui reste, et instructions de test sur l'iPhone.
 
+## État d'avancement et choix déjà faits
+- **Étape 1 faite** (carte + position + bouton « Ça ne va pas » + mise en ligne).
+- Fond de carte en ligne : **OpenFreeMap** (tiles.openfreemap.org, gratuit, sans clé, données OSM), style `dark` si l'iPhone est en mode sombre, `liberty` sinon. Sera complété par la carte hors ligne à l'étape 6.
+- MapLibre GL JS est copié dans `vendor/maplibre/` (pas de CDN).
+- Mise en ligne : workflow `.github/workflows/pages.yml` (GitHub Pages, source « GitHub Actions »), déclenché à chaque push sur `main`.
+- **Numéro de version** : constante `VERSION` dans `app.js`, affichée en bas de la fenêtre « Ça ne va pas ». L'augmenter à chaque mise en ligne, ainsi que le nom `CACHE` dans `sw.js` quand la liste des fichiers change.
+- Rapports « Ça ne va pas » : stockés dans `localStorage` (clé `gps-bordeaux-rapports`), exportés en fichier JSON via le menu Partager de l'iPhone.
+
 ## Idées pour plus tard (ne pas faire maintenant)
 - **Bouton « Étape » pendant la conduite** : il ouvre une barre de recherche ; tous les commerces correspondants sont affichés le long de l'itinéraire, chacun avec un nouvel itinéraire optionnel (détour proposé, sans perdre la destination finale).
 - **Option pour choisir entre deux ou trois itinéraires** avant de partir.

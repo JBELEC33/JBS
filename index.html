@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <!-- viewport-fit=cover : la carte occupe tout l'écran de l'iPhone, encoche comprise -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>GPS Bordeaux</title>
+
+  <!-- Réglages pour l'installation sur l'écran d'accueil de l'iPhone -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GPS Bordeaux">
+  <meta name="theme-color" content="#12203a">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+
+  <!-- Bibliothèque de carte MapLibre (copiée dans le dépôt, pas de service externe) -->
+  <link rel="stylesheet" href="vendor/maplibre/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- La carte -->
+  <div id="carte"></div>
+
+  <!-- Message d'état du GPS (recherche du signal, autorisation refusée…) -->
+  <div id="etat-gps" class="etat cache"></div>
+
+  <!-- Gros boutons, faciles à toucher -->
+  <button id="bouton-recentrer" class="bouton bouton-rond cache" aria-label="Recentrer sur ma position">
+    <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+      <path d="M12 2 L19 21 L12 17 L5 21 Z" fill="currentColor"/>
+    </svg>
+  </button>
+
+  <button id="bouton-probleme" class="bouton bouton-probleme">Ça ne va pas</button>
+
+  <!-- Fenêtre « Ça ne va pas » -->
+  <div id="panneau-rapport" class="panneau cache" role="dialog" aria-modal="true">
+    <div class="panneau-contenu">
+      <h2>Ça ne va pas</h2>
+      <p class="aide">L'endroit, l'heure et l'état de l'appli ont été notés.
+        Vous pouvez ajouter un commentaire (facultatif), <strong>à l'arrêt uniquement</strong>.</p>
+      <textarea id="rapport-commentaire" rows="3" placeholder="Ex. : le point bleu ne bouge plus"></textarea>
+      <div class="ligne-boutons">
+        <button id="rapport-annuler" class="bouton bouton-secondaire">Annuler</button>
+        <button id="rapport-enregistrer" class="bouton bouton-principal">Enregistrer</button>
+      </div>
+
+      <hr>
+      <h3>Rapports enregistrés : <span id="rapport-nombre">0</span></h3>
+      <ul id="rapport-liste"></ul>
+      <div class="ligne-boutons">
+        <button id="rapport-exporter" class="bouton bouton-secondaire">Exporter</button>
+        <button id="rapport-effacer" class="bouton bouton-danger">Tout effacer</button>
+      </div>
+      <p class="version">Version <span id="version"></span></p>
+    </div>
+  </div>
+
+  <script src="vendor/maplibre/maplibre-gl.js"></script>
+  <script src="rapports.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+/* Couleurs de l'appli : thème sombre, pour ne pas éblouir en voiture */
+:root {
+  --fond: #12203a;
+  --fond-panneau: #1b2b4a;
+  --texte: #f2f5fa;
+  --texte-doux: #a9b6cc;
+  --bleu: #2878ff;
+  --rouge: #e5484d;
+  --orange: #f29d38;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#carte {
+  position: absolute;
+  inset: 0;
+}
+
+.cache { display: none !important; }
+
+/* ---------- Boutons ---------- */
+.bouton {
+  border: none;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--texte);
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.bouton:active { transform: scale(0.96); }
+
+/* Bouton « Recentrer », en bas à droite */
+.bouton-rond {
+  position: absolute;
+  right: calc(16px + env(safe-area-inset-right));
+  bottom: calc(40px + env(safe-area-inset-bottom));
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: var(--bleu);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bouton « Ça ne va pas », en bas à gauche */
+.bouton-probleme {
+  position: absolute;
+  left: calc(16px + env(safe-area-inset-left));
+  bottom: calc(40px + env(safe-area-inset-bottom));
+  height: 56px;
+  padding: 0 20px;
+  background: var(--orange);
+  color: #1a1a1a;
+}
+
+.bouton-principal { background: var(--bleu); }
+.bouton-secondaire { background: #33466b; }
+.bouton-danger { background: var(--rouge); }
+
+/* ---------- Message d'état du GPS, en haut ---------- */
+.etat {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 12px;
+  right: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(27, 43, 74, 0.95);
+  font-size: 17px;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
+}
+.etat.erreur { background: rgba(160, 40, 45, 0.95); }
+
+/* ---------- Le point bleu ---------- */
+.point-position {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bleu);
+  border: 4px solid #fff;
+  box-sizing: border-box;
+  box-shadow: 0 0 0 0 rgba(40, 120, 255, 0.6);
+  animation: pulsation 2s infinite;
+}
+/* Point grisé quand la position est ancienne (signal perdu) */
+.point-position.ancien {
+  background: #8a94a6;
+  animation: none;
+}
+@keyframes pulsation {
+  0%   { box-shadow: 0 0 0 0 rgba(40, 120, 255, 0.6); }
+  70%  { box-shadow: 0 0 0 18px rgba(40, 120, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(40, 120, 255, 0); }
+}
+
+/* ---------- Fenêtre « Ça ne va pas » ---------- */
+.panneau {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+}
+.panneau-contenu {
+  width: 100%;
+  max-height: 88%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  padding: 20px 18px calc(20px + env(safe-area-inset-bottom));
+  background: var(--fond-panneau);
+  border-radius: 20px 20px 0 0;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.panneau h2 { margin: 0 0 8px; font-size: 24px; }
+.panneau h3 { margin: 4px 0 8px; font-size: 18px; }
+.aide { color: var(--texte-doux); font-size: 16px; margin: 0 0 12px; }
+.panneau textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 17px; /* 16 px minimum : évite le zoom automatique de Safari */
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #3b4f78;
+  background: #0f1a30;
+  color: var(--texte);
+}
+.ligne-boutons {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+.ligne-boutons .bouton { flex: 1; height: 56px; }
+.panneau hr { border: none; border-top: 1px solid #33466b; margin: 20px 0 12px; }
+#rapport-liste {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 15px;
+  color: var(--texte-doux);
+}
+#rapport-liste li { padding: 6px 0; border-bottom: 1px solid #26385a; }
+.version { color: var(--texte-doux); font-size: 13px; text-align: center; margin: 16px 0 0; }
+
+/* Crédits de la carte : discrets, au-dessus des boutons */
+.maplibregl-ctrl-bottom-right { bottom: calc(118px + env(safe-area-inset-bottom)); }
+.maplibregl-ctrl-bottom-left { display: none; }
