@@ -4,7 +4,7 @@
 
 // Numéro de version, affiché dans la fenêtre « Ça ne va pas ».
 // À changer à chaque mise en ligne pour vérifier que l'iPhone a bien la dernière version.
-const VERSION = '5.4 (feux, stops, cédez-le-passage)';
+const VERSION = '5.5 (panneaux au-dessus du trajet)';
 
 // Centre de Bordeaux (place de la Comédie), au format [longitude, latitude]
 const BORDEAUX = [-0.5747, 44.8425];

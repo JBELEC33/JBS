@@ -64,11 +64,10 @@ const Panneaux = (() => {
         carte.once('styledata', dessiner); // style pas encore prêt
         return;
       }
-      // Sous le trajet, pour ne pas le cacher
-      const avant = carte.getLayer('trajet-bord') ? 'trajet-bord' : undefined;
+      // Au-dessus de tout, trajet compris (le trajet est rangé dessous : voir itineraire.js)
       carte.addLayer({ id: 'panneaux', type: 'symbol', source: 'panneaux', minzoom: ZOOM_MIN,
         layout: { 'icon-image': ['get', 'image'], 'icon-size': ['interpolate', ['linear'], ['zoom'], 15, 0.65, 18, 1],
-          'icon-allow-overlap': true, 'icon-pitch-alignment': 'viewport' } }, avant);
+          'icon-allow-overlap': true, 'icon-pitch-alignment': 'viewport' } });
     } else {
       carte.getSource('panneaux').setData(donnees());
     }

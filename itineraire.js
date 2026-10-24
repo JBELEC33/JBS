@@ -93,15 +93,17 @@ const Itineraire = (() => {
       carte.once('styledata', dessiner);
       return;
     }
+    // Le trajet passe sous les feux, stops et cédez-le-passage, pour qu'ils restent visibles
+    const avant = carte.getLayer('panneaux') ? 'panneaux' : undefined;
     carte.addLayer({ id: 'trajet-bord', type: 'line', source: 'trajet',
       layout: { 'line-join': 'round', 'line-cap': 'round' },
-      paint: { 'line-color': '#0b2a66', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 7, 16, 14] } });
+      paint: { 'line-color': '#0b2a66', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 7, 16, 14] } }, avant);
     carte.addLayer({ id: 'trajet-ligne', type: 'line', source: 'trajet', filter: ['==', ['get', 'genre'], 'normal'],
       layout: { 'line-join': 'round', 'line-cap': 'round' },
-      paint: { 'line-color': '#2f8cff', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 4, 16, 9] } });
+      paint: { 'line-color': '#2f8cff', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 4, 16, 9] } }, avant);
     carte.addLayer({ id: 'trajet-pieton', type: 'line', source: 'trajet', filter: ['==', ['get', 'genre'], 'pieton'],
       layout: { 'line-join': 'round' },
-      paint: { 'line-color': '#f29d38', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 4, 16, 9], 'line-dasharray': [1.2, 0.8] } });
+      paint: { 'line-color': '#f29d38', 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 4, 16, 9], 'line-dasharray': [1.2, 0.8] } }, avant);
   }
 
   function dessiner() {
