@@ -57,19 +57,59 @@
         <div id="fiche-horaires" class="fiche-horaires"></div>
         <div id="fiche-distance" class="fiche-distance"></div>
         <button id="fiche-y-aller" class="bouton bouton-principal bouton-large">Y aller</button>
-        <div id="fiche-choix-gps" class="cache">
-          <p class="aide">Le calcul de l'itinéraire dans l'appli arrive à la prochaine étape. En attendant, ouvrir la destination dans :</p>
-          <div class="ligne-boutons">
-            <a id="fiche-waze" class="bouton bouton-secondaire bouton-lien" target="_blank" rel="noopener">Waze</a>
-            <a id="fiche-plans" class="bouton bouton-secondaire bouton-lien" target="_blank" rel="noopener">Plans</a>
-          </div>
-        </div>
         <button id="fiche-retour" class="bouton bouton-secondaire bouton-large">Retour aux résultats</button>
       </div>
 
       <div class="recherche-pied">
         <span id="recherche-info" class="recherche-info"></span>
         <button id="recherche-probleme" class="lien-probleme">Ça ne va pas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aperçu du trajet avant le départ -->
+  <div id="panneau-trajet" class="panneau-trajet cache">
+    <div id="trajet-destination" class="trajet-destination"></div>
+    <div id="trajet-resume" class="trajet-resume"></div>
+    <div id="trajet-details" class="trajet-details"></div>
+    <ul id="trajet-alertes" class="trajet-alertes"></ul>
+    <div id="trajet-boutons">
+      <button id="trajet-demarrer" class="bouton bouton-principal bouton-large">Démarrer</button>
+      <button id="trajet-simuler" class="bouton bouton-secondaire bouton-large">Simuler le trajet</button>
+    </div>
+    <div class="ligne-boutons">
+      <a id="trajet-waze" class="bouton bouton-secondaire bouton-lien" target="_blank" rel="noopener">Waze</a>
+      <a id="trajet-plans" class="bouton bouton-secondaire bouton-lien" target="_blank" rel="noopener">Plans</a>
+      <button id="trajet-fermer" class="bouton bouton-secondaire">Fermer</button>
+    </div>
+    <div id="trajet-info" class="recherche-info trajet-info"></div>
+  </div>
+
+  <!-- Barre du bas pendant le trajet -->
+  <div id="barre-trajet" class="barre-trajet cache">
+    <div class="barre-texte">
+      <div id="barre-destination" class="barre-destination"></div>
+      <div id="barre-resume" class="barre-resume"></div>
+      <div class="barre-note">Guidage détaillé : prochaine étape</div>
+    </div>
+    <div id="barre-simulation" class="barre-simulation cache">
+      <span class="barre-note">Simulation</span>
+      <div class="ligne-simulation">
+        <button id="simulation-moins" class="bouton bouton-secondaire bouton-petit" aria-label="Moins vite">−</button>
+        <span id="simulation-vitesse" class="simulation-vitesse">×2</span>
+        <button id="simulation-plus" class="bouton bouton-secondaire bouton-petit" aria-label="Plus vite">+</button>
+      </div>
+    </div>
+    <button id="barre-arreter" class="bouton bouton-danger bouton-arreter">Arrêter</button>
+  </div>
+
+  <!-- Petite confirmation avant d'arrêter le trajet -->
+  <div id="confirmation-arret" class="panneau cache">
+    <div class="panneau-contenu confirmation">
+      <h2>Arrêter le trajet ?</h2>
+      <div class="ligne-boutons">
+        <button id="arret-non" class="bouton bouton-secondaire">Non, continuer</button>
+        <button id="arret-oui" class="bouton bouton-danger">Oui, arrêter</button>
       </div>
     </div>
   </div>
@@ -110,6 +150,8 @@
   <script src="moteur-recherche.js"></script>
   <script src="horaires.js"></script>
   <script src="recherche.js"></script>
+  <script src="moteur-itineraire.js"></script>
+  <script src="itineraire.js"></script>
   <script src="rapports.js"></script>
   <script src="app.js"></script>
 </body>

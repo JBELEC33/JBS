@@ -225,6 +225,8 @@ const Recherche = (() => {
   function cadrer(liste) {
     if (!liste.length) return;
     const marges = margesCarte();
+    carte.stop();
+    carte.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
     if (liste.length === 1) {
       carte.easeTo({ center: [liste[0].lon, liste[0].lat], zoom: Math.max(carte.getZoom(), 15), padding: marges, duration: 600 });
       return;
@@ -275,23 +277,18 @@ const Recherche = (() => {
     const horaires = r.horaires ? Horaires.etat(r.horaires) : null;
     $('fiche-horaires').textContent = horaires ? horaires.texte : '';
     $('fiche-horaires').className = 'fiche-horaires ' + (horaires ? (horaires.ouvert ? 'ouvert' : 'ferme') : '');
-    $('fiche-choix-gps').classList.add('cache');
-    $('fiche-y-aller').classList.remove('cache');
     $('recherche-titre').textContent = '';
     $('recherche-fiche').classList.remove('cache');
     modePanneau('moitie');
     requestAnimationFrame(() => cadrer([r]));
   }
 
-  // « Y aller » : l'itinéraire calculé par l'appli arrive à l'étape 3.
-  // En attendant, on propose d'ouvrir la destination dans Waze ou Plans.
+  // « Y aller » : on ferme la recherche et on calcule l'itinéraire (aperçu avant le départ)
   function yAller() {
     if (!choisi) return;
-    const { lat, lon } = choisi;
-    $('fiche-waze').href = 'https://waze.com/ul?ll=' + lat + ',' + lon + '&navigate=yes';
-    $('fiche-plans').href = 'https://maps.apple.com/?daddr=' + lat + ',' + lon + '&dirflg=d';
-    $('fiche-y-aller').classList.add('cache');
-    $('fiche-choix-gps').classList.remove('cache');
+    const lieu = choisi;
+    fermer();
+    Itineraire.apercu(lieu);
   }
 
   function retourListe() {
@@ -333,10 +330,10 @@ const Recherche = (() => {
     $('ouvrir-recherche').classList.remove('cache');
     poserReperes([]);
     // Si la carte suivait le point bleu, on y revient
+    carte.stop();
+    carte.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
     if (etat.suivi && etat.position) {
-      carte.easeTo({ center: [etat.position.longitude, etat.position.latitude], padding: { top: 0, bottom: 0, left: 0, right: 0 }, duration: 600 });
-    } else {
-      carte.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
+      carte.easeTo({ center: [etat.position.longitude, etat.position.latitude], duration: 600 });
     }
   }
 

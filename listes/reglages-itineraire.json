@@ -1,0 +1,4 @@
+{
+  "_explication": "Réglages du calcul d'itinéraire. 'zone_badge' = rectangle [ouest, sud, est, nord] (longitudes et latitudes) où le badge ouvre les bornes escamotables et les rues à accès réglementé (Bordeaux centre). Après modification, le fichier des rues est refait à la mise en ligne suivante.",
+  "zone_badge": [-0.5950, 44.8250, -0.5600, 44.8600]
+}
