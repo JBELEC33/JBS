@@ -105,7 +105,8 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 
 ## État d'avancement et choix déjà faits
 - **Étape 1 faite** (carte + position + bouton « Ça ne va pas » + mise en ligne). Validée sur l'iPhone.
-- **Étape 2 faite** (recherche) : à valider sur l'iPhone.
+- **Étape 2 faite** (recherche). Validée sur l'iPhone.
+- **Étape 3 faite** (fichier des rues + itinéraire calculé sur le téléphone + aperçu + mode simulation) : à valider sur l'iPhone.
 - Fond de carte en ligne : **OpenFreeMap** (tiles.openfreemap.org, gratuit, sans clé, données OSM), style `dark` si l'iPhone est en mode sombre, `liberty` sinon. Sera complété par la carte hors ligne à l'étape 6.
 - MapLibre GL JS est copié dans `vendor/maplibre/` (pas de CDN).
 - Mise en ligne : workflow `.github/workflows/pages.yml` (GitHub Pages, source « GitHub Actions »), déclenché à chaque push sur `main`, chaque lundi (refait le fichier des lieux) et à la main (`workflow_dispatch`, option « refaire_donnees »).
@@ -123,6 +124,20 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 - `horaires.js` : lit les horaires OSM courants ; si l'écriture est trop complexe, rien n'est affiché.
 - « Y aller » : en attendant l'itinéraire (étape 3), propose d'ouvrir la destination dans Waze ou Plans.
 - Clavier bloqué au-dessus de 15 km/h (sécurité) ; les recherches récentes restent utilisables.
+
+### Itinéraire (étape 3)
+- **Zone couverte : l'agglomération bordelaise au sens large**, rectangle ouest -0.85, sud 44.70, est -0.35, nord 45.05 (constante `ZONE_COUVERTE` dans `scripts/preparer_rues.py`). Mesure faite : toute la Gironde ≈ 940 000 points de rues (fichier ≈ 10 Mo) contre ≈ 390 000 pour l'agglomération (fichier 5,6 Mo, **2,9 Mo compressé** au téléchargement). Hors zone : message + Waze/Plans.
+- `scripts/preparer_rues.py` (Python standard) : télécharge les voies (Overpass), applique les règles, ne garde que le **réseau principal relié dans les deux sens** (algorithme de Kosaraju : écarte les bouts de rue isolés derrière des barrières), écrit `donnees/rues.bin` (format : « GPSR », longueur de l'en-tête, en-tête JSON décrivant les tableaux + noms de rues, puis tableaux binaires little-endian alignés sur 4 octets).
+- Règles appliquées à la préparation :
+  - exclues : `highway=busway`, voies `access/motor_vehicle/motorcar = no/private/psv/bus…`, `service=driveway/parking_aisle/emergency_access/drive-through`, surfaces (`area=yes`) ;
+  - `highway=pedestrian` : autorisée, signalée, 8 km/h ; `motor_vehicle=delivery/permit` : autorisée, signalée « accès réservé » ;
+  - **dans la zone badge** (`listes/reglages-itineraire.json`, rectangle de Bordeaux centre) : rues `access=no` sans bus = accès réglementé, autorisées et signalées ; bornes non fixes (`bollard=rising`, inconnu…) franchissables et signalées « borne : badge » ;
+  - hors zone badge : toutes les bornes bloquent ; partout : `bollard=fixed`, blocs, chaînes, barrières/portails fermés (`access=no/private`) bloquent ;
+  - sens uniques (`oneway`, ronds-points, autoroutes), interdictions de tourner (relations `restriction` par un point, `no_*` et `only_*`).
+  - vitesse : limitation OSM (`maxspeed`) sinon valeur par défaut selon le type de voie, × 0,7 en ville (0,85-0,9 sur rocade/autoroute) pour tenir compte des feux et du trafic. À ajuster si les durées affichées sont trop optimistes.
+- `moteur-itineraire.js` : A* sur les arêtes (permet les interdictions de tourner), petites pénalités de virage (droite 5 s, gauche 10 s, serré 18 s, borne 15 s), demi-tour seulement en cul-de-sac ; accroche du départ et de l'arrivée à la rue la plus proche (grille de cases de ~300 m). Calcul mesuré : 5 à 70 ms sur ordinateur pour des trajets de 1 à 25 km.
+- `itineraire.js` : chargement du fichier des rues 4 s après l'ouverture, aperçu (durée, distance, heure d'arrivée, alertes zone piétonne / accès réservé / bornes), trajet dessiné (bleu, pointillés orange en zone piétonne, étiquettes « borne : badge » et « zone piétonne : rouler au pas »), « Démarrer » (suivi du point, barre du bas, arrêt avec confirmation), **mode simulation** (×1 à ×8).
+- Tests : `scripts/tester_itineraire.js` (trajets réels, temps de calcul, détail rue par rue) lancé à chaque mise en ligne.
 
 ## Idées pour plus tard (ne pas faire maintenant)
 - **Bouton « Étape » pendant la conduite** : il ouvre une barre de recherche ; tous les commerces correspondants sont affichés le long de l'itinéraire, chacun avec un nouvel itinéraire optionnel (détour proposé, sans perdre la destination finale).
