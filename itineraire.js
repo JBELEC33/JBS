@@ -107,6 +107,7 @@ const Itineraire = (() => {
   }
 
   function dessiner() {
+    Panneaux.surTrajet(trajet); // seulement les feux, stops et cédez-le-passage du trajet
     couches();
     const source = carte.getSource('trajet');
     if (source) source.setData(donneesCarte());

@@ -4,16 +4,12 @@
 
 // Numéro de version, affiché dans la fenêtre « Ça ne va pas ».
 // À changer à chaque mise en ligne pour vérifier que l'iPhone a bien la dernière version.
-const VERSION = '5.5 (panneaux au-dessus du trajet)';
+const VERSION = '5.6 (nouvelle carte, panneaux du trajet)';
 
 // Centre de Bordeaux (place de la Comédie), au format [longitude, latitude]
 const BORDEAUX = [-0.5747, 44.8425];
 
-// Fonds de carte OpenFreeMap : gratuits, sans clé, données OpenStreetMap.
-// Sombre la nuit (ou si l'iPhone est en mode sombre), clair sinon.
-const STYLE_SOMBRE = 'https://tiles.openfreemap.org/styles/dark';
-const STYLE_CLAIR = 'https://tiles.openfreemap.org/styles/liberty';
-const modeSombre = window.matchMedia('(prefers-color-scheme: dark)');
+// Fond de carte : voir style-carte.js (OpenFreeMap, retouché pour la conduite).
 
 // Au-delà de ce délai sans nouvelle position, le point devient gris.
 const DELAI_POSITION_ANCIENNE_MS = 15000;
@@ -46,7 +42,7 @@ function noterErreur(texte) {
 // ---------------------------------------------------------------------
 const carte = new maplibregl.Map({
   container: 'carte',
-  style: modeSombre.matches ? STYLE_SOMBRE : STYLE_CLAIR,
+  style: StyleCarte.styleDeDepart(), // le vrai fond de carte est chargé par style-carte.js
   center: BORDEAUX,
   zoom: 13,
   attributionControl: false
@@ -54,10 +50,8 @@ const carte = new maplibregl.Map({
 // Crédits obligatoires (OpenStreetMap…), repliés dans un petit « i »
 carte.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
-// Si l'iPhone passe du mode clair au mode sombre, la carte suit
-modeSombre.addEventListener('change', () => {
-  carte.setStyle(modeSombre.matches ? STYLE_SOMBRE : STYLE_CLAIR);
-});
+// Fond de carte retouché pour la conduite (jour / nuit selon le mode de l'iPhone)
+StyleCarte.installer(carte);
 
 // Le point bleu : un simple rond dessiné en HTML, posé sur la carte
 const elementPoint = document.createElement('div');
@@ -203,7 +197,7 @@ function etatPourRapport() {
       zoom: Number(carte.getZoom().toFixed(2)),
       rotation: Math.round(carte.getBearing()),
       inclinaison: Math.round(carte.getPitch()),
-      style: modeSombre.matches ? 'sombre' : 'clair'
+      style: StyleCarte.nuit() ? 'nuit' : 'jour'
     },
     appliInstallee: window.navigator.standalone === true,
     ecranTaille: window.innerWidth + '×' + window.innerHeight,

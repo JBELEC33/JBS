@@ -7,7 +7,8 @@
 // =====================================================================
 const Panneaux = (() => {
   const ZOOM_MIN = 15;
-  let carte, liste = [];
+  let carte, reseau = null, liste = [];
+  let surLeTrajet = null; // numéros des panneaux du trajet en cours (null : tous)
 
   // Petites images dessinées une fois (pas de fichier image à télécharger)
   function images() {
@@ -50,8 +51,12 @@ const Panneaux = (() => {
 
   function donnees() {
     const nom = ['', 'panneau-feu', 'panneau-stop', 'panneau-cedez'];
-    return { type: 'FeatureCollection', features: liste.map(([lon, lat, genre]) => ({
-      type: 'Feature', properties: { image: nom[genre] }, geometry: { type: 'Point', coordinates: [lon, lat] } })) };
+    const features = [];
+    liste.forEach(([lon, lat, genre], i) => {
+      if (surLeTrajet && !surLeTrajet.has(i)) return;
+      features.push({ type: 'Feature', properties: { image: nom[genre] }, geometry: { type: 'Point', coordinates: [lon, lat] } });
+    });
+    return { type: 'FeatureCollection', features };
   }
 
   function dessiner() {
@@ -79,10 +84,18 @@ const Panneaux = (() => {
   }
 
   // Le fichier des rues vient d'être chargé
-  function surReseau(reseau) {
+  function surReseau(leReseau) {
+    reseau = leReseau;
     liste = reseau.panneaux ? reseau.panneaux() : [];
     dessiner();
   }
 
-  return { installer, surReseau, nombre: () => liste.length };
+  // Trajet affiché (ou null quand il n'y en a plus) : appelé par itineraire.js
+  function surTrajet(trajet) {
+    surLeTrajet = trajet && reseau && reseau.panneauxDuTrajet ? reseau.panneauxDuTrajet(trajet) : null;
+    dessiner();
+  }
+
+  return { installer, surReseau, surTrajet, nombre: () => liste.length,
+    affiches: () => (surLeTrajet ? surLeTrajet.size : liste.length) };
 })();

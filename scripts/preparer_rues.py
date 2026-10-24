@@ -349,6 +349,7 @@ def attentes(morceau, noeuds_osm, panneaux):
     Un panneau s'applique au sens indiqué par OSM (direction=forward/backward) ; sinon, au sens
     qui arrive vers le carrefour le plus proche (la ligne d'arrêt est juste avant le carrefour)."""
     aller = retour = 0
+    liens = []  # (id OSM du panneau, 0 : sens de la voie / 1 : sens inverse)
     n = len(morceau)
     # Distance de chaque point depuis le début du tronçon
     cumul = [0.0]
@@ -367,9 +368,11 @@ def attentes(morceau, noeuds_osm, panneaux):
             sens = 'forward' if cumul[k] >= cumul[-1] / 2 else 'backward'
         if sens == 'forward' and k > 0:
             aller += ATTENTE_PANNEAU[genre]
+            liens.append((r, 0))
         elif sens == 'backward' and k < n - 1:
             retour += ATTENTE_PANNEAU[genre]
-    return aller, retour
+            liens.append((r, 1))
+    return aller, retour, liens
 
 
 def construire(elements, zone_badge):
@@ -461,9 +464,9 @@ def construire(elements, zone_badge):
                                           noeuds_osm[morceau[j + 1]][0], noeuds_osm[morceau[j + 1]][1])
                                for j in range(len(morceau) - 1))
                 forme = [(round(noeuds_osm[r][0] * 1e6), round(noeuds_osm[r][1] * 1e6)) for r in morceau[1:-1]]
-                aller, retour = attentes(morceau, noeuds_osm, panneaux)
+                aller, retour, liens = attentes(morceau, noeuds_osm, panneaux)
                 troncons.append((numero[morceau[0]], numero[morceau[-1]], longueur, iv, drapeaux, vitesse, lim, sens, forme,
-                                 aller, retour))
+                                 aller, retour, liens))
                 debut = k
 
     # 3 bis) On ne garde que le grand réseau où l'on peut aller et revenir partout
@@ -492,7 +495,9 @@ def construire(elements, zone_badge):
     seg_debut_forme = array('I')
     seg_attente = array('B')  # 2 valeurs par tronçon : sens de la voie, puis sens inverse
     forme_lon, forme_lat = array('i'), array('i')
-    for (a, b, longueur, iv, drapeaux, vitesse, lim, sens, forme, aller, retour) in troncons:
+    liens_panneaux = []  # (id OSM du panneau, tronçon × 2 + sens) : panneaux qui s'appliquent à ce sens de tronçon
+    for (a, b, longueur, iv, drapeaux, vitesse, lim, sens, forme, aller, retour, liens) in troncons:
+        liens_panneaux += [(r, len(seg_a) * 2 + inverse) for (r, inverse) in liens]
         seg_a.append(nouveau[a])
         seg_b.append(nouveau[b])
         seg_longueur.append(min(65535, max(1, round(longueur))))
@@ -551,12 +556,19 @@ def construire(elements, zone_badge):
         inter_type.append(1 if genre.startswith('only_') else 0)
     journal(f'Interdictions de tourner retenues : {len(inter_de)}')
 
-    # 6) Feux, stops et cédez-le-passage (pour les dessiner sur la carte)
+    # 6) Feux, stops et cédez-le-passage (pour les dessiner sur la carte), seulement ceux du réseau gardé,
+    # avec les sens de tronçon où ils s'appliquent (pour n'afficher que ceux du trajet en cours)
     pan_lon, pan_lat, pan_type = array('i'), array('i'), array('B')
-    for r, genre in sorted(panneaux.items()):
+    lien_panneau, lien_arete = array('I'), array('I')
+    indice_panneau = {}
+    for r in sorted({r for (r, _) in liens_panneaux} | {r for r in panneaux if r in numero}):
+        indice_panneau[r] = len(pan_type)
         pan_lon.append(round(noeuds_osm[r][0] * 1e6))
         pan_lat.append(round(noeuds_osm[r][1] * 1e6))
-        pan_type.append(genre)
+        pan_type.append(panneaux[r])
+    for (r, code) in sorted(liens_panneaux, key=lambda x: x[1]):
+        lien_panneau.append(indice_panneau[r])
+        lien_arete.append(code)
     journal(f'Panneaux : {sum(1 for g in pan_type if g == 1)} feux, {sum(1 for g in pan_type if g == 2)} stops, '
             f'{sum(1 for g in pan_type if g == 3)} cédez-le-passage ; '
             f'sens de tronçon avec attente : {sum(1 for x in seg_attente if x)}')
@@ -570,6 +582,7 @@ def construire(elements, zone_badge):
         'tronconDebutForme': ('Uint32', seg_debut_forme), 'formeLon': ('Int32', forme_lon), 'formeLat': ('Int32', forme_lat),
         'voieNom': ('Uint32', voie_nom), 'tronconAttente': ('Uint8', seg_attente),
         'panneauLon': ('Int32', pan_lon), 'panneauLat': ('Int32', pan_lat), 'panneauType': ('Uint8', pan_type),
+        'lienPanneau': ('Uint32', lien_panneau), 'lienArete': ('Uint32', lien_arete),
         'interDe': ('Uint32', inter_de), 'interPar': ('Uint32', inter_par), 'interVers': ('Uint32', inter_vers), 'interType': ('Uint8', inter_type),
     }
     liste_noms = [''] * len(noms)

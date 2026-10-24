@@ -435,6 +435,15 @@
         for (let i = 0; i < n; i++) liste.push([t.panneauLon[i] / 1e6, t.panneauLat[i] / 1e6, t.panneauType[i]]);
         return liste;
       },
+      // Numéros des panneaux qui s'appliquent au trajet (dans son sens de parcours),
+      // ou null si le fichier des rues est trop ancien pour le savoir
+      panneauxDuTrajet: (trajet) => {
+        if (!t.lienArete) return null;
+        const codes = new Set(trajet.morceaux.map((m) => t.areteTroncon[m.arete]));
+        const garder = new Set();
+        for (let i = 0; i < t.lienArete.length; i++) if (codes.has(t.lienArete[i])) garder.add(t.lienPanneau[i]);
+        return garder;
+      },
       date: entete.date,
       nbNoeuds, nbTroncons, nbAretes,
       zoneCouverte: entete.zoneCouverte

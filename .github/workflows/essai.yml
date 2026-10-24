@@ -1,4 +1,4 @@
-# Essai temporaire (sera supprimé) : récupère les styles de carte OpenFreeMap pour les étudier
+# Essai temporaire (sera supprimé) : captures d'écran avec la vraie carte
 name: Essai
 on:
   push:
@@ -8,14 +8,23 @@ permissions:
 jobs:
   essai:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - run: |
-          mkdir -p resultats
-          for s in liberty dark positron bright fiord; do curl -sf https://tiles.openfreemap.org/styles/$s -o resultats/$s.json || echo "pas de style $s"; done
-          ls -la resultats
+          mkdir -p donnees resultats
+          gh release download donnees -p lieux.json -p travaux.json -D donnees
+          python3 -m pip install --quiet --user --break-system-packages osmium
+          python3 scripts/preparer_rues.py
+          node scripts/tester_itineraire.js donnees/rues.bin | head -4
+          npm install --silent playwright@1.48.2
+          npx playwright install --with-deps chromium > /dev/null
+          (python3 -m http.server 8765 > /dev/null 2>&1 &)
+          sleep 2
+          node essai_captures.js
           git config user.name essai; git config user.email essai@example.com
           git checkout -b essai-resultats
           git add -f resultats
-          git commit -qm "Résultats de l'essai"
+          git commit -qm "Captures de l'essai"
           git push -f origin essai-resultats
