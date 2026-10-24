@@ -1,0 +1,52 @@
+# Essai temporaire (ne pas fusionner dans main) : recherche des sources de travaux
+name: Essai services
+on:
+  push:
+    branches: [claude/keen-bell-077ud9]
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Catalogue Bordeaux Métropole
+        run: |
+          B=https://opendata.bordeaux-metropole.fr/api/explore/v2.1
+          for mot in chantier travaux circulation evenement deviation fermeture; do
+            echo "=== recherche : $mot"
+            curl -sS -m 60 "$B/catalog/datasets?where=search(%22$mot%22)&limit=40&select=dataset_id,metas.default.title,metas.default.modified,metas.default.records_count,metas.default.license" | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)
+          for r in d.get('results',[]): print(' -', r.get('dataset_id'), '|', r.get('title'), '|', r.get('modified'), '|', r.get('records_count'), '|', r.get('license'))
+          print('   total', d.get('total_count'), d.get('error_code',''), d.get('message',''))"
+          done
+      - name: Détails des jeux candidats
+        run: |
+          B=https://opendata.bordeaux-metropole.fr/api/explore/v2.1
+          for id in ci_mesure_a ci_chantier ci_evenement ci_trafi_l ci_chant_a ci_evene_p ci_evt_p; do
+            echo "=================== $id"
+            curl -sS -m 60 "$B/catalog/datasets/$id" | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)
+          if 'metas' not in d: print(d); sys.exit()
+          m=d['metas']['default']
+          print('titre:', m.get('title')); print('licence:', m.get('license'), '| modifié:', m.get('modified'), '| données modifiées:', m.get('data_processed'), '| nb:', m.get('records_count'))
+          print('description:', (m.get('description') or '')[:900])
+          print('champs:', [(f['name'], f['type'], f.get('label')) for f in d.get('fields',[])])"
+            curl -sS -m 60 "$B/catalog/datasets/$id/records?limit=3" | head -c 2500; echo
+          done
+      - name: Conditions TomTom
+        run: |
+          for u in https://developer.tomtom.com/legal https://docs.tomtom.com/legal https://developer.tomtom.com/legal/terms-and-conditions https://www.tomtom.com/legal/terms-of-use/ https://developer.tomtom.com/pricing https://docs.tomtom.com/pricing/price-announcement https://developer.tomtom.com/traffic-api/documentation/traffic-incidents/incident-details; do
+            echo "=================== $u"
+            curl -sSL -m 60 -A "Mozilla/5.0" "$u" -o page.html -w '%{http_code} %{url_effective}\n' || continue
+            python3 - <<'PY'
+          import re,html
+          t=open('page.html',encoding='utf-8',errors='ignore').read()
+          t=re.sub(r'(?s)<script.*?</script>|<style.*?</style>','',t)
+          t=html.unescape(re.sub(r'<[^>]+>',' ',t))
+          t=re.sub(r'\s+',' ',t)
+          print('longueur', len(t))
+          for mot in ['cach','stor','24 hour','hours','statistic','historic','Freemium','free','per day','2,500','2500','non-commercial','commercial','domain','referr','whitelist','Location Data','end user','store, cache']:
+            for m in re.finditer(re.escape(mot), t, re.I):
+              print('['+mot+']', t[max(0,m.start()-220):m.end()+260]); break
+          PY
+          done
