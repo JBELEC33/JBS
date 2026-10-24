@@ -468,3 +468,123 @@ body.en-trajet #bouton-recentrer { bottom: calc(150px + env(safe-area-inset-bott
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 .repere-destination { width: 34px; height: 34px; border-width: 4px; }
+
+/* =====================================================================
+   Navigation (étape 4)
+   ===================================================================== */
+#nav-haut, #nav-vitesse, #nav-conseil { z-index: 12; }
+#panneau-secours { z-index: 25; }
+body.en-navigation #ouvrir-recherche,
+body.en-navigation #etat-gps { display: none !important; }
+
+/* Bandeau du haut : prochaine manœuvre */
+.nav-haut {
+  position: absolute;
+  top: calc(8px + env(safe-area-inset-top));
+  left: 8px;
+  right: 8px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+.nav-principale {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #1f6f4a; /* vert foncé, bien lisible au soleil comme la nuit */
+  color: #fff;
+}
+.nav-icone { flex: none; width: 72px; height: 72px; color: #fff; }
+.nav-texte { flex: 1; min-width: 0; }
+.nav-distance { font-size: 34px; font-weight: 800; line-height: 1.05; }
+.nav-titre { font-size: 20px; font-weight: 700; margin-top: 2px; }
+.nav-rue { font-size: 17px; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-rue:empty, .nav-distance:empty { display: none; }
+.nav-suivante {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: #174f36;
+  color: #e6f4ec;
+  font-size: 16px;
+}
+.nav-puis { opacity: 0.8; }
+.nav-suivante-icone { width: 26px; height: 26px; display: inline-block; }
+#nav-conseil { top: calc(150px + env(safe-area-inset-top)); }
+
+/* Barre du bas */
+.barre-trajet { flex-wrap: wrap; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
+.barre-infos { flex: 1; display: flex; justify-content: space-around; text-align: center; min-width: 0; }
+.barre-grand { font-size: 22px; font-weight: 800; }
+.barre-petit { font-size: 12px; color: var(--texte-doux); }
+.bouton-secours { flex: none; width: 64px; height: 56px; font-size: 13px; line-height: 1.15; padding: 0; }
+.bouton-arreter { flex: none; height: 56px; padding: 0 14px; font-size: 17px; }
+
+/* Vitesse et limitation, à gauche au-dessus de la barre */
+.nav-vitesse {
+  position: absolute;
+  left: calc(12px + env(safe-area-inset-left));
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+body.en-navigation.avec-simulation .nav-vitesse { bottom: calc(150px + env(safe-area-inset-bottom)); }
+.compteur {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: var(--fond-panneau);
+  border: 3px solid #4a5e86;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+.compteur span { font-size: 26px; font-weight: 800; line-height: 1; }
+.compteur small { font-size: 11px; color: var(--texte-doux); }
+.compteur.exces { background: var(--rouge); border-color: #fff; }
+.panneau-limite {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #fff;
+  border: 7px solid #d62828;
+  box-sizing: border-box;
+  color: #111;
+  font-size: 22px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Pendant la navigation : boutons « Recentrer » et « Ça ne va pas » à droite, au-dessus de la barre */
+body.en-navigation #bouton-recentrer { bottom: calc(96px + env(safe-area-inset-bottom)); }
+body.en-navigation #bouton-probleme {
+  left: auto;
+  right: calc(12px + env(safe-area-inset-right));
+  bottom: calc(176px + env(safe-area-inset-bottom));
+  height: 44px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+/* La flèche de position pendant la navigation (couchée sur la carte) */
+.point-position.fleche-navigation {
+  width: 34px;
+  height: 40px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 40'%3E%3Cpath d='M17 2 L32 37 L17 29 L2 37 Z' fill='%232878ff' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}

@@ -104,7 +104,7 @@ jobs:
       - name: Préparer le site
         run: |
           mkdir -p _site/donnees
-          cp -r index.html style.css app.js rapports.js moteur-recherche.js horaires.js recherche.js moteur-itineraire.js itineraire.js sw.js manifest.webmanifest icons vendor listes _site/
+          cp -r index.html style.css app.js rapports.js moteur-recherche.js horaires.js recherche.js moteur-itineraire.js itineraire.js consignes.js navigation.js sw.js manifest.webmanifest icons vendor listes _site/
           gh release download donnees -p lieux.json -D _site/donnees || echo "Fichier des lieux pas encore disponible"
           gh release download donnees -p rues.bin -D _site/donnees || echo "Fichier des rues pas encore disponible"
           ls -la _site _site/donnees

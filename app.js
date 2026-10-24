@@ -4,7 +4,7 @@
 
 // Numéro de version, affiché dans la fenêtre « Ça ne va pas ».
 // À changer à chaque mise en ligne pour vérifier que l'iPhone a bien la dernière version.
-const VERSION = '3.0 (étape 3 : itinéraire)';
+const VERSION = '4.0 (étape 4 : guidage)';
 
 // Centre de Bordeaux (place de la Comédie), au format [longitude, latitude]
 const BORDEAUX = [-0.5747, 44.8425];
@@ -78,6 +78,11 @@ function afficherEtat(texte, erreur) {
 }
 
 let carteCentree = false; // la carte s'est-elle déjà placée sur la position ?
+let dernierePositionReelle = null; // dernière position du vrai GPS (pour revenir après une simulation)
+
+function revenirPositionReelle() {
+  if (dernierePositionReelle) nouvellePosition(dernierePositionReelle);
+}
 
 // Appelé à chaque nouvelle position donnée par le GPS de l'iPhone
 function nouvellePosition(pos) {
@@ -94,9 +99,15 @@ function nouvellePosition(pos) {
   afficherEtat(null);
 
   const lngLat = [pos.coords.longitude, pos.coords.latitude];
-  pointBleu.setLngLat(lngLat);
-  if (premiere) pointBleu.addTo(carte);
+  if (premiere) pointBleu.setLngLat(lngLat).addTo(carte);
   elementPoint.classList.remove('ancien');
+
+  // Pendant la navigation, c'est navigation.js qui déplace le point et la caméra (en douceur)
+  if (Navigation.actif()) {
+    Navigation.position(pos);
+    return;
+  }
+  pointBleu.setLngLat(lngLat);
 
   // Pendant une recherche ou l'aperçu du trajet, la carte montre autre chose : on ne la bouge pas
   if (etat.ecran !== 'carte' && etat.ecran !== 'trajet') return;
@@ -126,7 +137,10 @@ function erreurPosition(err) {
 if ('geolocation' in navigator) {
   afficherEtat('Recherche de votre position…');
   // Pendant une simulation, les positions viennent du simulateur : on ignore le vrai GPS
-  navigator.geolocation.watchPosition((pos) => { if (!etat.simulation) nouvellePosition(pos); }, erreurPosition, {
+  navigator.geolocation.watchPosition((pos) => {
+    dernierePositionReelle = pos;
+    if (!etat.simulation) nouvellePosition(pos);
+  }, erreurPosition, {
     enableHighAccuracy: true, // utilise la puce GPS (plus précis)
     maximumAge: 0,            // jamais de position en cache
     timeout: 20000
@@ -155,6 +169,7 @@ carte.on('dragstart', (e) => {
 });
 
 boutonRecentrer.addEventListener('click', () => {
+  if (Navigation.actif()) { Navigation.recentrer(); return; }
   etat.suivi = true;
   boutonRecentrer.classList.add('cache');
   if (etat.position) {
@@ -200,7 +215,8 @@ function etatPourRapport() {
 document.getElementById('version').textContent = VERSION;
 Rapports.installer(carte, etat, etatPourRapport);
 Recherche.installer(carte, etat, { lon: BORDEAUX[0], lat: BORDEAUX[1] });
-Itineraire.installer(carte, etat, { lon: BORDEAUX[0], lat: BORDEAUX[1] }, nouvellePosition);
+Itineraire.installer(carte, etat, { lon: BORDEAUX[0], lat: BORDEAUX[1] });
+Navigation.installer({ carte, etat, pointBleu, elementPoint, positionSimulee: nouvellePosition, revenirPositionReelle });
 
 // ---------------------------------------------------------------------
 // Fonctionnement en appli installée : enregistre le « service worker »,

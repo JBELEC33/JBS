@@ -165,6 +165,7 @@
                   const position = cumul[k / 2 - 1] + (cumul[k / 2] - cumul[k / 2 - 1]) * f;
                   meilleur = {
                     troncon: s, fraction: position / total, ecart: d,
+                    cap: cap(p[k - 2], p[k - 1], p[k], p[k + 1]), // direction de la rue (sens du dessin)
                     lon: (p[k - 2] + (p[k] - p[k - 2]) * f) / 1e6, lat: (p[k - 1] + (p[k + 1] - p[k - 1]) * f) / 1e6
                   };
                 }
@@ -214,7 +215,9 @@
     const ferme = new Uint32Array(nbAretes);
     let numeroRecherche = 0;
 
-    function calculer(depart, arrivee) {
+    // options.cap : direction de la voiture (degrés), pour ne pas proposer de demi-tour au départ
+    function calculer(depart, arrivee, options) {
+      options = options || {};
       const debut = Date.now();
       const zone = entete.zoneCouverte;
       const dedans = (p) => p.lon >= zone[0] && p.lon <= zone[2] && p.lat >= zone[1] && p.lat <= zone[3];
@@ -242,8 +245,13 @@
 
       // Départ : on peut partir dans un sens ou dans l'autre du tronçon de départ
       const eAvant = areteDuTroncon[a.troncon * 2], eArriere = areteDuTroncon[a.troncon * 2 + 1];
-      if (eAvant >= 0) toucher(eAvant, (1 - a.fraction) * areteDuree[eAvant], -1);
-      if (eArriere >= 0) toucher(eArriere, a.fraction * areteDuree[eArriere], -1);
+      // Partir dans le sens contraire de la voiture demande un demi-tour : on l'évite autant que possible
+      const demiTour = (capRue) => {
+        if (options.cap == null) return 0;
+        return Math.abs(((capRue - options.cap + 540) % 360) - 180) > 100 ? PENALITE_DEMI_TOUR + 30 : 0;
+      };
+      if (eAvant >= 0) toucher(eAvant, (1 - a.fraction) * areteDuree[eAvant] + demiTour(a.cap), -1);
+      if (eArriere >= 0) toucher(eArriere, a.fraction * areteDuree[eArriere] + demiTour(a.cap + 180), -1);
 
       // Arrivée : on entre dans le tronçon d'arrivée par un bout ou par l'autre
       const dAvant = areteDuTroncon[b.troncon * 2], dArriere = areteDuTroncon[b.troncon * 2 + 1];
@@ -290,6 +298,13 @@
       return construireTrajet(chemin, finale, a, b, direct, meilleur, explores, Date.now() - debut);
     }
 
+    function continuations(e) {
+      const v = t.areteCible[e];
+      let n = 0;
+      for (let g = t.debutAretes[v]; g < t.debutAretes[v + 1]; g++) if ((t.areteTroncon[g] ^ 1) !== t.areteTroncon[e]) n++;
+      return n;
+    }
+
     // Transforme la liste d'arêtes en trajet affichable : morceaux de ligne, bornes, distance, durée
     function construireTrajet(chemin, finale, a, b, direct, duree, explores, ms) {
       const morceaux = [];
@@ -308,7 +323,11 @@
           nom: entete.noms[t.voieNom[t.tronconVoie[s]]] || '',
           vitesse: t.tronconVitesse[s],
           limitation: t.tronconLimitation[s],
-          arete: e
+          arete: e,
+          // Nombre de directions possibles au bout de ce morceau (sans compter le demi-tour) :
+          // 1 = simple virage de la route, 2 ou plus = vrai carrefour où il faut choisir
+          continuations: continuations(e),
+          borneFin: !!(t.noeudDrapeaux[t.areteCible[e]] & BORNE_BADGE)
         });
       };
       // Fraction du départ et de l'arrivée, dans le sens de parcours de chaque arête

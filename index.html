@@ -85,13 +85,42 @@
     <div id="trajet-info" class="recherche-info trajet-info"></div>
   </div>
 
-  <!-- Barre du bas pendant le trajet -->
-  <div id="barre-trajet" class="barre-trajet cache">
-    <div class="barre-texte">
-      <div id="barre-destination" class="barre-destination"></div>
-      <div id="barre-resume" class="barre-resume"></div>
-      <div class="barre-note">Guidage détaillé : prochaine étape</div>
+  <!-- Navigation : bandeau du haut (prochaine manœuvre, puis la suivante) -->
+  <div id="nav-haut" class="nav-haut cache">
+    <div class="nav-principale">
+      <div id="nav-icone" class="nav-icone"></div>
+      <div class="nav-texte">
+        <div id="nav-distance" class="nav-distance"></div>
+        <div id="nav-titre" class="nav-titre"></div>
+        <div id="nav-rue" class="nav-rue"></div>
+      </div>
     </div>
+    <div id="nav-suivante" class="nav-suivante cache">
+      <span class="nav-puis">Puis</span>
+      <span id="nav-suivante-icone" class="nav-suivante-icone"></span>
+      <span id="nav-suivante-texte"></span>
+    </div>
+  </div>
+
+  <!-- Navigation : conseil pour garder l'écran allumé (si l'iPhone ne le permet pas) -->
+  <div id="nav-conseil" class="etat nav-conseil cache">Pour que l'écran reste allumé pendant le trajet :
+    Réglages › Luminosité et affichage › Verrouillage automatique › Jamais (pensez à le remettre après).</div>
+
+  <!-- Navigation : vitesse actuelle et limitation de la rue -->
+  <div id="nav-vitesse" class="nav-vitesse cache">
+    <div id="nav-limite" class="panneau-limite cache"></div>
+    <div id="nav-compteur" class="compteur"><span id="nav-vitesse-valeur">–</span><small>km/h</small></div>
+  </div>
+
+  <!-- Navigation : barre du bas (arrivée, temps et distance restants) -->
+  <div id="barre-trajet" class="barre-trajet cache">
+    <div class="barre-infos">
+      <div><div id="nav-arrivee" class="barre-grand"></div><div class="barre-petit">arrivée</div></div>
+      <div><div id="nav-reste-temps" class="barre-grand"></div><div class="barre-petit">restant</div></div>
+      <div><div id="nav-reste-distance" class="barre-grand"></div><div class="barre-petit">distance</div></div>
+    </div>
+    <button id="barre-secours" class="bouton bouton-secondaire bouton-secours" aria-label="Ouvrir dans Waze ou Plans">Waze<br>Plans</button>
+    <button id="barre-arreter" class="bouton bouton-danger bouton-arreter">Arrêter</button>
     <div id="barre-simulation" class="barre-simulation cache">
       <span class="barre-note">Simulation</span>
       <div class="ligne-simulation">
@@ -100,7 +129,18 @@
         <button id="simulation-plus" class="bouton bouton-secondaire bouton-petit" aria-label="Plus vite">+</button>
       </div>
     </div>
-    <button id="barre-arreter" class="bouton bouton-danger bouton-arreter">Arrêter</button>
+  </div>
+
+  <!-- Bouton de secours : relancer la destination dans Waze ou Plans -->
+  <div id="panneau-secours" class="panneau cache">
+    <div class="panneau-contenu confirmation">
+      <h2>Ouvrir la destination dans…</h2>
+      <div class="ligne-boutons">
+        <a id="secours-waze" class="bouton bouton-principal bouton-lien" target="_blank" rel="noopener">Waze</a>
+        <a id="secours-plans" class="bouton bouton-principal bouton-lien" target="_blank" rel="noopener">Plans</a>
+      </div>
+      <button id="secours-fermer" class="bouton bouton-secondaire bouton-large">Fermer</button>
+    </div>
   </div>
 
   <!-- Petite confirmation avant d'arrêter le trajet -->
@@ -152,6 +192,8 @@
   <script src="recherche.js"></script>
   <script src="moteur-itineraire.js"></script>
   <script src="itineraire.js"></script>
+  <script src="consignes.js"></script>
+  <script src="navigation.js"></script>
   <script src="rapports.js"></script>
   <script src="app.js"></script>
 </body>

@@ -1,19 +1,17 @@
 // =====================================================================
 // Itinéraire : chargement du fichier des rues, calcul, affichage du trajet
-// sur la carte, aperçu avant le départ et mode simulation.
-// Le guidage détaillé (« dans 200 m, tournez à droite ») arrive à l'étape 4.
+// sur la carte et aperçu avant le départ.
+// Le guidage pendant le trajet et la simulation sont dans navigation.js.
 // =====================================================================
 const Itineraire = (() => {
-  let carte, etat, centreParDefaut, positionSimulee;
+  let carte, etat, centreParDefaut;
   let reseau = null;            // réseau des rues, une fois chargé
   let chargement = null;        // promesse du chargement en cours
   let trajet = null;            // trajet affiché
   let destination = null;
   let reperes = [];             // repères posés sur la carte (destination, bornes, zones piétonnes)
-  let simulation = null;        // simulation en cours
 
   const $ = (id) => document.getElementById(id);
-  const VITESSES_SIMULATION = [1, 2, 4, 8];
 
   // -------------------------------------------------------------------
   // Chargement du fichier des rues (une fois, en arrière-plan)
@@ -203,114 +201,51 @@ const Itineraire = (() => {
   }
 
   // -------------------------------------------------------------------
-  // Départ (réel ou simulé)
+  // Départ (réel ou simulé) : la navigation prend le relais (navigation.js)
   // -------------------------------------------------------------------
   function demarrer(simuler) {
     if (!trajet) return;
+    if (!simuler && !etat.position) {
+      $('trajet-details').textContent = 'Position GPS inconnue : impossible de démarrer. Vous pouvez simuler le trajet.';
+      return;
+    }
     $('panneau-trajet').classList.add('cache');
-    $('barre-trajet').classList.remove('cache');
-    $('barre-destination').textContent = destination.nom;
-    $('barre-resume').textContent = 'Arrivée vers ' + heureArrivee(trajet.duree) + ' · ' + texteDuree(trajet.duree) + ' · ' + texteDistance(trajet.distance);
-    $('barre-simulation').classList.toggle('cache', !simuler);
-    etat.ecran = 'trajet';
-    etat.suivi = true;
-    $('bouton-recentrer').classList.add('cache');
-    etat.trajet.mode = simuler ? 'simulation' : 'en route';
-    if (simuler) demarrerSimulation();
-    else if (etat.position) carte.easeTo({ center: [etat.position.longitude, etat.position.latitude], zoom: 16, duration: 800 });
+    Navigation.demarrer(trajet, destination, simuler);
   }
 
-  function arreter() {
-    arreterSimulation();
+  // Nouveau calcul depuis la position actuelle (quand on est sorti du trajet)
+  function recalculer(depart, cap) {
+    if (!reseau || !destination) return null;
+    const resultat = reseau.calculer(depart, { lon: destination.lon, lat: destination.lat }, { cap });
+    if (resultat.erreur) return resultat;
+    trajet = resultat;
+    etat.trajet.dureeS = Math.round(trajet.duree);
+    etat.trajet.distanceM = Math.round(trajet.distance);
+    dessiner();
+    return trajet;
+  }
+
+  // Fin du trajet (ou « Fermer » sur l'aperçu) : on efface tout
+  function terminer() {
     trajet = null;
     destination = null;
     etat.trajet = null;
     etat.ecran = 'carte';
     document.body.classList.remove('en-trajet');
     $('panneau-trajet').classList.add('cache');
-    $('barre-trajet').classList.add('cache');
-    $('confirmation-arret').classList.add('cache');
     dessiner();
+  }
+
+  function fermerApercu() {
+    terminer();
     if (etat.position) carte.easeTo({ center: [etat.position.longitude, etat.position.latitude], zoom: 16, duration: 600 });
   }
 
   // -------------------------------------------------------------------
-  // Mode simulation : le point bleu « roule » sur le trajet
-  // -------------------------------------------------------------------
-  function demarrerSimulation() {
-    // Liste des points du trajet, avec la vitesse de chaque morceau
-    const points = [];
-    trajet.morceaux.forEach((m) => m.coords.forEach((c) => {
-      const dernier = points[points.length - 1];
-      if (!dernier || dernier.lon !== c[0] || dernier.lat !== c[1]) points.push({ lon: c[0], lat: c[1], vitesse: m.vitesse });
-    }));
-    simulation = { points, index: 0, avance: 0, multiplicateur: simulation ? simulation.multiplicateur : 2, minuterie: null };
-    etat.simulation = true;
-    afficherVitesseSimulation();
-    simulation.minuterie = setInterval(pasSimulation, 1000);
-    pasSimulation();
-  }
-
-  function pasSimulation() {
-    const s = simulation;
-    if (!s) return;
-    let reste = (s.points[Math.min(s.index + 1, s.points.length - 1)].vitesse / 3.6) * s.multiplicateur; // mètres à parcourir en 1 s
-    while (reste > 0 && s.index < s.points.length - 1) {
-      const a = s.points[s.index], b = s.points[s.index + 1];
-      const longueur = MoteurDistances.metres(a, b);
-      if (s.avance + reste < longueur) { s.avance += reste; reste = 0; break; }
-      reste -= longueur - s.avance;
-      s.avance = 0;
-      s.index++;
-    }
-    const a = s.points[s.index], b = s.points[Math.min(s.index + 1, s.points.length - 1)];
-    const longueur = MoteurDistances.metres(a, b) || 1;
-    const f = Math.min(1, s.avance / longueur);
-    const lon = a.lon + (b.lon - a.lon) * f, lat = a.lat + (b.lat - a.lat) * f;
-    const cap = MoteurDistances.cap(a, b);
-    const arrive = s.index >= s.points.length - 1;
-    positionSimulee({
-      coords: { longitude: lon, latitude: lat, accuracy: 5, speed: arrive ? 0 : (b.vitesse / 3.6) * s.multiplicateur, heading: cap },
-      timestamp: Date.now()
-    });
-    if (arrive) {
-      arreterSimulation();
-      $('barre-resume').textContent = 'Vous êtes arrivée.';
-    }
-  }
-
-  function arreterSimulation() {
-    if (simulation && simulation.minuterie) clearInterval(simulation.minuterie);
-    if (simulation) simulation.minuterie = null;
-    etat.simulation = false;
-  }
-
-  function afficherVitesseSimulation() {
-    $('simulation-vitesse').textContent = '×' + simulation.multiplicateur;
-  }
-
-  function changerVitesse(sens) {
-    if (!simulation) return;
-    const i = VITESSES_SIMULATION.indexOf(simulation.multiplicateur);
-    simulation.multiplicateur = VITESSES_SIMULATION[Math.max(0, Math.min(VITESSES_SIMULATION.length - 1, i + sens))];
-    afficherVitesseSimulation();
-  }
-
-  // Petits calculs de distance et de direction entre deux points { lon, lat }
-  const MoteurDistances = {
-    metres: (a, b) => Moteur.distanceMetres(a.lon, a.lat, b.lon, b.lat),
-    cap: (a, b) => {
-      const x = (b.lon - a.lon) * Math.cos(a.lat * Math.PI / 180), y = b.lat - a.lat;
-      return (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
-    }
-  };
-
-  // -------------------------------------------------------------------
-  function installer(laCarte, lEtat, centre, fonctionPositionSimulee) {
+  function installer(laCarte, lEtat, centre) {
     carte = laCarte;
     etat = lEtat;
     centreParDefaut = centre;
-    positionSimulee = fonctionPositionSimulee;
     // Le fichier des rues est préparé en arrière-plan quelques secondes après l'ouverture
     setTimeout(() => charger().catch(() => {}), 4000);
     // Après un changement de fond de carte (jour/nuit), on redessine le trajet
@@ -318,13 +253,8 @@ const Itineraire = (() => {
 
     $('trajet-demarrer').addEventListener('click', () => demarrer(false));
     $('trajet-simuler').addEventListener('click', () => demarrer(true));
-    $('trajet-fermer').addEventListener('click', arreter);
-    $('barre-arreter').addEventListener('click', () => $('confirmation-arret').classList.remove('cache'));
-    $('arret-non').addEventListener('click', () => $('confirmation-arret').classList.add('cache'));
-    $('arret-oui').addEventListener('click', arreter);
-    $('simulation-moins').addEventListener('click', () => changerVitesse(-1));
-    $('simulation-plus').addEventListener('click', () => changerVitesse(1));
+    $('trajet-fermer').addEventListener('click', fermerApercu);
   }
 
-  return { installer, apercu, charger };
+  return { installer, apercu, charger, recalculer, terminer };
 })();

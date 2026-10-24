@@ -4,7 +4,7 @@
 // la dernière mise à jour), et on se rabat sur la copie si pas de réseau.
 // Les tuiles de la carte ne sont pas gardées ici (ce sera l'étape 6).
 // =====================================================================
-const CACHE = 'gps-bordeaux-v3';
+const CACHE = 'gps-bordeaux-v4';
 const FICHIERS = [
   './',
   'index.html',
@@ -16,6 +16,8 @@ const FICHIERS = [
   'recherche.js',
   'moteur-itineraire.js',
   'itineraire.js',
+  'consignes.js',
+  'navigation.js',
   'listes/categories.json',
   'listes/sigles.json',
   'manifest.webmanifest',

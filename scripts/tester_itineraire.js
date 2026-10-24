@@ -7,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const MoteurItineraire = require('../moteur-itineraire.js');
+const Consignes = require('../consignes.js');
 
 const fichier = process.argv[2] || path.join(__dirname, '..', 'donnees', 'rues.bin');
 const octets = fs.readFileSync(fichier);
@@ -64,6 +65,11 @@ for (const [de, a, obligatoire] of essais) {
     });
     console.log('   détail : ' + detail.map((d) => `${d.cle} ${Math.round(d.longueur)} m à ${d.vitesse} km/h`).join(' | '));
   }
+  // Consignes de guidage (étape 4)
+  const prep = Consignes.preparer(r, a);
+  const consignes = prep.consignes.map((c) => `${(c.pos / 1000).toFixed(2)} km ${c.titre}${c.rue ? ' → ' + c.rue : ''}`);
+  console.log(`   ${consignes.length} consignes : ${consignes.slice(0, 12).join(' | ')}${consignes.length > 12 ? ' | …' : ''}`);
+  if (prep.consignes[prep.consignes.length - 1].type !== 'arrivee') { console.log('   ÉCHEC : pas de consigne d\'arrivée'); echecs++; }
   // Vérification de bon sens : vitesse moyenne entre 8 et 90 km/h
   const vitesse = r.distance / r.duree * 3.6;
   if (vitesse < 8 || vitesse > 90) { console.log(`   ÉCHEC : vitesse moyenne anormale (${vitesse.toFixed(0)} km/h)`); echecs++; }
