@@ -153,6 +153,7 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
   - Sur la route (écart < 30 m), le point est « collé » à la route. Recalcul automatique après 3 positions hors trajet (précision ≤ 50 m) ou dès 80 m d'écart (précision ≤ 40 m), au plus toutes les 8 s, en tenant compte de la direction de la voiture (`calculer(…, { cap })` évite de proposer un demi-tour au départ).
   - Écran gardé allumé avec l'API Wake Lock ; si l'iPhone refuse, conseil affiché une fois (Réglages › Luminosité et affichage › Verrouillage automatique).
   - ~~Bandeau vert en haut~~ (retiré le 24/10/2026, version 5.1) ; petit message `#nav-message` ; barre du bas (arrivée, temps, distance, Waze/Plans, Arrêter avec confirmation), compteur de vitesse + panneau de limitation (`maxspeed`), compteur rouge au-delà de la limitation + 4 km/h.
+  - **Heure d'arrivée prévue gardée** (demande du 24/10/2026, version 5.3) : l'heure d'arrivée annoncée au démarrage est mémorisée et **ne change jamais** pendant le trajet (ni bouchon, ni recalcul). Elle est affichée sous l'heure d'arrivée actuelle (« prévu 10:58 »), en orange avec le retard (« prévu 10:58 (+6 min) ») si l'arrivée estimée est plus tardive.
   - La simulation est dans `navigation.js` ; à la fin d'une simulation, le point revient à la dernière vraie position GPS.
 - Les tests de `scripts/tester_itineraire.js` affichent aussi les consignes de chaque trajet.
 

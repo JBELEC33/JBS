@@ -486,6 +486,7 @@ body.en-navigation #etat-gps { display: none !important; }
 .barre-infos { flex: 1; display: flex; justify-content: space-around; text-align: center; min-width: 0; }
 .barre-grand { font-size: 22px; font-weight: 800; }
 .barre-petit { font-size: 12px; color: var(--texte-doux); }
+#nav-arrivee-prevue.en-retard { color: #ffa94d; font-weight: 700; }
 .bouton-secours { flex: none; width: 64px; height: 56px; font-size: 13px; line-height: 1.15; padding: 0; }
 .bouton-arreter { flex: none; height: 56px; padding: 0 14px; font-size: 17px; }
 

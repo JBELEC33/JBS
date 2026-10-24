@@ -29,7 +29,10 @@ const Navigation = (() => {
     return min < 60 ? min + ' min' : Math.floor(min / 60) + ' h ' + String(min % 60).padStart(2, '0');
   }
   function heure(dans) {
-    const d = new Date(Date.now() + dans * 1000);
+    return heureDe(Date.now() + dans * 1000);
+  }
+  function heureDe(ms) {
+    const d = new Date(ms);
     return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
   }
 
@@ -55,6 +58,10 @@ const Navigation = (() => {
       affiche: null, capAffiche: carte.getBearing(),
       anim: null, verrou: null
     };
+    // Heure d'arrivée annoncée au départ : gardée telle quelle jusqu'à la fin
+    // (même en cas de bouchon ou de recalcul), pour comparer avec l'heure réelle.
+    nav.arriveePrevue = Date.now() + nav.prep.totalTemps * 1000;
+    etat.trajet.arriveePrevue = heureDe(nav.arriveePrevue);
     etat.ecran = 'trajet';
     etat.suivi = true;
     etat.trajet.mode = simuler ? 'simulation' : 'en route';
@@ -194,6 +201,10 @@ const Navigation = (() => {
       $('nav-reste-temps').textContent = texteDuree(resteTemps);
       $('nav-reste-distance').textContent = texteDistance(resteDistance);
     }
+    // Sous l'heure d'arrivée : l'heure prévue au départ (en orange si on est en retard)
+    const retard = Math.round((Date.now() + (nav.arrivee ? 0 : resteTemps) * 1000 - nav.arriveePrevue) / 60000);
+    $('nav-arrivee-prevue').textContent = 'prévu ' + heureDe(nav.arriveePrevue) + (retard >= 1 ? ' (+' + retard + ' min)' : '');
+    $('nav-arrivee-prevue').classList.toggle('en-retard', retard >= 1);
 
     // Vitesse actuelle et limitation de la rue (si connue)
     const v = nav.arrivee ? 0 : (kmh != null ? Math.round(kmh) : null);
