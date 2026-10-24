@@ -136,7 +136,7 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
   - **dans la zone badge** (`listes/reglages-itineraire.json`, rectangle de Bordeaux centre) : rues `access=no` sans bus = accès réglementé, autorisées et signalées ; bornes non fixes (`bollard=rising`, inconnu…) franchissables et signalées « borne : badge » ;
   - hors zone badge : toutes les bornes bloquent ; partout : `bollard=fixed`, blocs, chaînes, barrières/portails fermés (`access=no/private`) bloquent ;
   - sens uniques (`oneway`, ronds-points, autoroutes), interdictions de tourner (relations `restriction` par un point, `no_*` et `only_*`).
-  - vitesse : limitation OSM (`maxspeed`) sinon valeur par défaut selon le type de voie, × 0,7 en ville (0,85-0,9 sur rocade/autoroute) pour tenir compte des feux et du trafic. À ajuster si les durées affichées sont trop optimistes.
+  - vitesse : limitation OSM (`maxspeed`) sinon valeur par défaut selon le type de voie, × 0,8 en ville (0,7 avant la version 5.4) (0,85-0,9 sur rocade/autoroute) pour tenir compte des feux et du trafic. À ajuster si les durées affichées sont trop optimistes.
 - `moteur-itineraire.js` : A* sur les arêtes (permet les interdictions de tourner), petites pénalités de virage (droite 5 s, gauche 10 s, serré 18 s, borne 15 s), demi-tour seulement en cul-de-sac ; accroche du départ et de l'arrivée à la rue la plus proche (grille de cases de ~300 m). Calcul mesuré : 5 à 70 ms sur ordinateur pour des trajets de 1 à 25 km.
 - `itineraire.js` : chargement du fichier des rues 4 s après l'ouverture, aperçu (durée, distance, heure d'arrivée, alertes zone piétonne / accès réservé / bornes), trajet dessiné (bleu, pointillés orange en zone piétonne, étiquettes « borne : badge » et « zone piétonne : rouler au pas »), « Démarrer » (suivi du point, barre du bas, arrêt avec confirmation), **mode simulation** (×1 à ×8).
 - Tests : `scripts/tester_itineraire.js` (trajets réels, temps de calcul, détail rue par rue) lancé à chaque mise en ligne.
@@ -159,6 +159,11 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 
 ### Appui long sur la carte (ajout du 24/10/2026, version 5.2)
 - `appui-long.js` : garder le doigt ~0,6 s sur la carte (écran carte ou aperçu, jamais pendant la navigation) pose un repère, affiche la rue la plus proche (trouvée dans le fichier des rues, sur le téléphone, sans envoi sur internet) et la distance, avec « Y aller » (ouvre l'aperçu du trajet) ou « Annuler ». Le geste est annulé si le doigt bouge de plus de 10 px ou si deux doigts touchent l'écran.
+
+### Feux, stops et cédez-le-passage (ajout du 24/10/2026, version 5.4)
+- `scripts/preparer_rues.py` garde les points OSM `highway=traffic_signals` (feu), `stop` et `give_way` (cédez-le-passage) des voies retenues : tableaux `panneauLon/Lat/Type` (1 feu, 2 stop, 3 cédez) dans `rues.bin`.
+- **Temps d'attente compté dans l'itinéraire** : feu 15 s, stop 6 s, cédez-le-passage 3 s (constante `ATTENTE_PANNEAU`), au plus 40 s par tronçon et par sens, tableau `tronconAttente` (2 valeurs par tronçon : sens de la voie OSM, sens inverse). Un panneau compte pour le sens indiqué par OSM (`direction=forward/backward`), sinon pour le sens qui arrive au carrefour le plus proche. Pour ne pas compter les feux deux fois, `COEFF_VILLE` est passé de 0,7 à 0,8.
+- `panneaux.js` : icônes dessinées sur le téléphone (canvas, aucune image à télécharger), couche `panneaux` visible dès le zoom 15, sous le trajet, sur la carte comme en navigation. `moteur-itineraire.js` → `panneaux()` ; un ancien fichier des rues sans ces tableaux fonctionne encore (pas d'icônes, pas d'attente).
 
 ### Travaux (étape 5)
 - **Décision du 24/10/2026 : on fait sans TomTom.** Ne pas brancher TomTom (ni autre service en ligne de trafic) sans nouvel accord de l'utilisatrice et sans vérifier la licence.
@@ -188,5 +193,5 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 - Guidage vocal en français.
 - Favoris (maison, crèche, adresses fréquentes).
 - Enregistrer mes trajets et les revoir sur la carte.
-- Éviter les feux et les bus TBM.
+- Éviter les feux et les bus TBM (les feux sont déjà comptés dans la durée depuis la version 5.4).
 - Apprendre de mes temps de trajet réels.

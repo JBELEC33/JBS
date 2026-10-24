@@ -64,13 +64,20 @@ VITESSE_DEFAUT = {
 }
 # Vitesse réellement pratiquée = limitation × ce coefficient (feux, trafic, virages)
 COEFF_VITESSE = {'motorway': 0.9, 'motorway_link': 0.8, 'trunk': 0.85, 'trunk_link': 0.75}
-COEFF_VILLE = 0.7
+# (0,8 depuis que les feux, stops et cédez-le-passage sont comptés à part ; avant : 0,7)
+COEFF_VILLE = 0.8
 VITESSE_PIETON = 8  # km/h : « rouler au pas »
 
 # Drapeaux des tronçons
 PIETON, ACCES_LIMITE, ROND_POINT = 1, 2, 4
 # Drapeaux des points
 BLOQUE, BORNE_BADGE = 1, 2
+
+# Feux, stops et cédez-le-passage (OSM highway=traffic_signals / stop / give_way) :
+# numéro de panneau et temps d'attente moyen ajouté au trajet (secondes)
+PANNEAUX = {'traffic_signals': 1, 'stop': 2, 'give_way': 3}
+ATTENTE_PANNEAU = {1: 15, 2: 6, 3: 3}
+ATTENTE_MAX = 40  # au plus, par tronçon et par sens
 
 
 def journal(*args):
@@ -120,7 +127,8 @@ def lire_geofabrik():
             self.relations = []
 
         def node(self, n):
-            if 'barrier' in n.tags and n.location.valid() and dedans(n.location.lon, n.location.lat):
+            if ('barrier' in n.tags or n.tags.get('highway') in PANNEAUX) and n.location.valid() \
+                    and dedans(n.location.lon, n.location.lat):
                 self.barrieres[n.id] = {t.k: t.v for t in n.tags}
 
         def way(self, w):
@@ -286,7 +294,7 @@ def composante_principale(nb_noeuds, troncons, noeud_drapeaux):
     Les points bloqués (barrière, borne fixe) ne laissent pas passer."""
     suivants = [[] for _ in range(nb_noeuds)]
     precedents = [[] for _ in range(nb_noeuds)]
-    for (a, b, _l, _v, _d, _vi, _li, sens, _f) in troncons:
+    for (a, b, _l, _v, _d, _vi, _li, sens, *_reste) in troncons:
         if noeud_drapeaux[a] & BLOQUE or noeud_drapeaux[b] & BLOQUE:
             continue
         if sens >= 0:
@@ -336,6 +344,34 @@ def composante_principale(nb_noeuds, troncons, noeud_drapeaux):
 # ---------------------------------------------------------------------
 # Construction du réseau
 # ---------------------------------------------------------------------
+def attentes(morceau, noeuds_osm, panneaux):
+    """Temps d'attente (s) aux feux, stops et cédez-le-passage d'un tronçon, dans chaque sens.
+    Un panneau s'applique au sens indiqué par OSM (direction=forward/backward) ; sinon, au sens
+    qui arrive vers le carrefour le plus proche (la ligne d'arrêt est juste avant le carrefour)."""
+    aller = retour = 0
+    n = len(morceau)
+    # Distance de chaque point depuis le début du tronçon
+    cumul = [0.0]
+    for j in range(n - 1):
+        cumul.append(cumul[-1] + distance_m(noeuds_osm[morceau[j]][0], noeuds_osm[morceau[j]][1],
+                                            noeuds_osm[morceau[j + 1]][0], noeuds_osm[morceau[j + 1]][1]))
+    for k, r in enumerate(morceau):
+        tags = noeuds_osm[r][2]
+        genre = PANNEAUX.get(tags.get('highway')) if tags else None
+        if not genre:
+            continue
+        panneaux[r] = genre
+        sens = tags.get('direction') or tags.get('traffic_signals:direction') or ''
+        if sens not in ('forward', 'backward'):
+            # Plus près de la fin du tronçon = sens « aller » (dans le sens de la voie OSM)
+            sens = 'forward' if cumul[k] >= cumul[-1] / 2 else 'backward'
+        if sens == 'forward' and k > 0:
+            aller += ATTENTE_PANNEAU[genre]
+        elif sens == 'backward' and k < n - 1:
+            retour += ATTENTE_PANNEAU[genre]
+    return aller, retour
+
+
 def construire(elements, zone_badge):
     noeuds_osm = {}  # id OSM → (lon, lat, tags)
     voies_osm = []
@@ -409,7 +445,8 @@ def construire(elements, zone_badge):
     noms = {'': 0}
     voie_nom = array('I')
     voie_index = {}  # id OSM → numéro de voie
-    troncons = []    # (a, b, longueur, voie, drapeaux, vitesse, limitation, sens, forme)
+    troncons = []    # (a, b, longueur, voie, drapeaux, vitesse, limitation, sens, forme, attente aller, attente retour)
+    panneaux = {}    # id OSM du point → numéro de panneau (seulement sur les voies retenues)
     for (id_osm, refs, drapeaux, sens, vitesse, lim, nom, hw) in voies:
         iv = len(voie_nom)
         voie_index[id_osm] = iv
@@ -424,7 +461,9 @@ def construire(elements, zone_badge):
                                           noeuds_osm[morceau[j + 1]][0], noeuds_osm[morceau[j + 1]][1])
                                for j in range(len(morceau) - 1))
                 forme = [(round(noeuds_osm[r][0] * 1e6), round(noeuds_osm[r][1] * 1e6)) for r in morceau[1:-1]]
-                troncons.append((numero[morceau[0]], numero[morceau[-1]], longueur, iv, drapeaux, vitesse, lim, sens, forme))
+                aller, retour = attentes(morceau, noeuds_osm, panneaux)
+                troncons.append((numero[morceau[0]], numero[morceau[-1]], longueur, iv, drapeaux, vitesse, lim, sens, forme,
+                                 aller, retour))
                 debut = k
 
     # 3 bis) On ne garde que le grand réseau où l'on peut aller et revenir partout
@@ -451,8 +490,9 @@ def construire(elements, zone_badge):
     seg_limitation = array('B')
     seg_sens = []
     seg_debut_forme = array('I')
+    seg_attente = array('B')  # 2 valeurs par tronçon : sens de la voie, puis sens inverse
     forme_lon, forme_lat = array('i'), array('i')
-    for (a, b, longueur, iv, drapeaux, vitesse, lim, sens, forme) in troncons:
+    for (a, b, longueur, iv, drapeaux, vitesse, lim, sens, forme, aller, retour) in troncons:
         seg_a.append(nouveau[a])
         seg_b.append(nouveau[b])
         seg_longueur.append(min(65535, max(1, round(longueur))))
@@ -461,6 +501,8 @@ def construire(elements, zone_badge):
         seg_vitesse.append(min(255, max(1, round(vitesse))))
         seg_limitation.append(min(255, lim))
         seg_sens.append(sens)
+        seg_attente.append(min(ATTENTE_MAX, aller))
+        seg_attente.append(min(ATTENTE_MAX, retour))
         seg_debut_forme.append(len(forme_lon))
         for (x, y) in forme:
             forme_lon.append(x)
@@ -509,6 +551,16 @@ def construire(elements, zone_badge):
         inter_type.append(1 if genre.startswith('only_') else 0)
     journal(f'Interdictions de tourner retenues : {len(inter_de)}')
 
+    # 6) Feux, stops et cédez-le-passage (pour les dessiner sur la carte)
+    pan_lon, pan_lat, pan_type = array('i'), array('i'), array('B')
+    for r, genre in sorted(panneaux.items()):
+        pan_lon.append(round(noeuds_osm[r][0] * 1e6))
+        pan_lat.append(round(noeuds_osm[r][1] * 1e6))
+        pan_type.append(genre)
+    journal(f'Panneaux : {sum(1 for g in pan_type if g == 1)} feux, {sum(1 for g in pan_type if g == 2)} stops, '
+            f'{sum(1 for g in pan_type if g == 3)} cédez-le-passage ; '
+            f'sens de tronçon avec attente : {sum(1 for x in seg_attente if x)}')
+
     tableaux = {
         'noeudLon': ('Int32', noeud_lon), 'noeudLat': ('Int32', noeud_lat), 'noeudDrapeaux': ('Uint8', noeud_drapeaux),
         'debutAretes': ('Uint32', debut_aretes), 'areteCible': ('Uint32', arete_cible), 'areteTroncon': ('Uint32', arete_troncon),
@@ -516,7 +568,8 @@ def construire(elements, zone_badge):
         'tronconVoie': ('Uint32', seg_voie), 'tronconDrapeaux': ('Uint8', seg_drapeaux),
         'tronconVitesse': ('Uint8', seg_vitesse), 'tronconLimitation': ('Uint8', seg_limitation),
         'tronconDebutForme': ('Uint32', seg_debut_forme), 'formeLon': ('Int32', forme_lon), 'formeLat': ('Int32', forme_lat),
-        'voieNom': ('Uint32', voie_nom),
+        'voieNom': ('Uint32', voie_nom), 'tronconAttente': ('Uint8', seg_attente),
+        'panneauLon': ('Int32', pan_lon), 'panneauLat': ('Int32', pan_lat), 'panneauType': ('Uint8', pan_type),
         'interDe': ('Uint32', inter_de), 'interPar': ('Uint32', inter_par), 'interVers': ('Uint32', inter_vers), 'interType': ('Uint8', inter_type),
     }
     liste_noms = [''] * len(noms)

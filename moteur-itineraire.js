@@ -57,7 +57,9 @@
         const s = t.areteTroncon[e] >> 1;
         const v = t.tronconVitesse[s] / 3.6;
         if (v > vitesseMax) vitesseMax = v;
-        areteDuree[e] = t.tronconLongueur[s] / v;
+        // Temps de roulage + attente aux feux, stops et cédez-le-passage de ce sens
+        // (les anciens fichiers des rues n'ont pas ce tableau)
+        areteDuree[e] = t.tronconLongueur[s] / v + (t.tronconAttente ? t.tronconAttente[t.areteTroncon[e]] : 0);
         areteDuTroncon[t.areteTroncon[e]] = e;
         const p = points(t.areteTroncon[e]);
         capDepart[e] = cap(p[0], p[1], p[2], p[3]);
@@ -426,6 +428,13 @@
       definirTravaux,
       etatTravaux: (s) => tronconTravaux[s],
       nomTroncon: (s) => entete.noms[t.voieNom[t.tronconVoie[s]]] || '',
+      // Feux (1), stops (2) et cédez-le-passage (3) : [[lon, lat, genre], …]
+      panneaux: () => {
+        const liste = [];
+        const n = t.panneauType ? t.panneauType.length : 0;
+        for (let i = 0; i < n; i++) liste.push([t.panneauLon[i] / 1e6, t.panneauLat[i] / 1e6, t.panneauType[i]]);
+        return liste;
+      },
       date: entete.date,
       nbNoeuds, nbTroncons, nbAretes,
       zoneCouverte: entete.zoneCouverte

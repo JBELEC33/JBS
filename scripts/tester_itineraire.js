@@ -15,6 +15,9 @@ let debut = Date.now();
 const reseau = MoteurItineraire.creerReseau(octets.buffer.slice(octets.byteOffset, octets.byteOffset + octets.length));
 console.log(`Fichier : ${(octets.length / 1048576).toFixed(1)} Mo, ${reseau.nbNoeuds} points, ${reseau.nbTroncons} tronçons, ${reseau.nbAretes} arêtes, rues du ${reseau.date}`);
 console.log(`Préparation : ${Date.now() - debut} ms (ordinateur ; compter 3 à 5 fois plus sur iPhone)`);
+const panneaux = reseau.panneaux();
+const compte = (g) => panneaux.filter((p) => p[2] === g).length;
+console.log(`Panneaux : ${compte(1)} feux, ${compte(2)} stops, ${compte(3)} cédez-le-passage`);
 
 const lieux = {
   'Place de la Bourse': [-0.5705, 44.8415],

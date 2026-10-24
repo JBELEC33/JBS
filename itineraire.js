@@ -27,6 +27,7 @@ const Itineraire = (() => {
           const debut = Date.now();
           reseau = MoteurItineraire.creerReseau(tampon);
           Travaux.surReseau(reseau); // les chantiers et rues bloquées sont accrochés aux rues
+          Panneaux.surReseau(reseau); // feux, stops et cédez-le-passage sur la carte
           etat.reseau = { date: reseau.date, preparationMs: Date.now() - debut, taille: tampon.byteLength };
           return reseau;
         })
