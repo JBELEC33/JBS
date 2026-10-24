@@ -71,7 +71,7 @@ def journal(*args):
 
 def telecharger_osm():
     h = '|'.join(TYPES_VOIES)
-    requete = (f'[out:json][timeout:1500][maxsize:4000000000];{ZONE}'
+    requete = (f'[out:json][timeout:540][maxsize:4000000000];{ZONE}'
                f'way{FILTRE_ZONE}["highway"~"^({h})$"]->.voies;'
                'node(w.voies)->.points;'
                'rel(bw.voies)["type"="restriction"]->.interdictions;'
@@ -82,7 +82,7 @@ def telecharger_osm():
                 journal('Téléchargement OpenStreetMap :', serveur)
                 req = urllib.request.Request(serveur, data=urllib.parse.urlencode({'data': requete}).encode(),
                                              headers={'User-Agent': AGENT})
-                with urllib.request.urlopen(req, timeout=1800) as r:
+                with urllib.request.urlopen(req, timeout=600) as r:  # 10 min au plus par serveur
                     brut = r.read()
                 elements = json.loads(brut)['elements']
                 journal(f'  {len(elements)} éléments reçus ({len(brut) // 1048576} Mo)')
