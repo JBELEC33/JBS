@@ -190,6 +190,58 @@ def distance_m(lon1, lat1, lon2, lat2):
     return math.hypot(x, y) * 6371000
 
 
+def composante_principale(nb_noeuds, troncons, noeud_drapeaux):
+    """Plus grand ensemble de points tous reliés entre eux dans les deux sens (algorithme de Kosaraju).
+    Les points bloqués (barrière, borne fixe) ne laissent pas passer."""
+    suivants = [[] for _ in range(nb_noeuds)]
+    precedents = [[] for _ in range(nb_noeuds)]
+    for (a, b, _l, _v, _d, _vi, _li, sens, _f) in troncons:
+        if noeud_drapeaux[a] & BLOQUE or noeud_drapeaux[b] & BLOQUE:
+            continue
+        if sens >= 0:
+            suivants[a].append(b); precedents[b].append(a)
+        if sens <= 0:
+            suivants[b].append(a); precedents[a].append(b)
+    # 1er passage : ordre de fin de visite (parcours en profondeur sans récursion)
+    vu = bytearray(nb_noeuds)
+    ordre = []
+    for depart in range(nb_noeuds):
+        if vu[depart]:
+            continue
+        vu[depart] = 1
+        pile = [(depart, 0)]
+        while pile:
+            u, k = pile[-1]
+            if k < len(suivants[u]):
+                pile[-1] = (u, k + 1)
+                v = suivants[u][k]
+                if not vu[v]:
+                    vu[v] = 1
+                    pile.append((v, 0))
+            else:
+                pile.pop()
+                ordre.append(u)
+    # 2e passage sur le graphe inversé : chaque visite donne un ensemble fortement relié
+    groupe = [-1] * nb_noeuds
+    meilleur, taille_max, n = -1, 0, 0
+    for depart in reversed(ordre):
+        if groupe[depart] >= 0:
+            continue
+        groupe[depart] = n
+        pile, taille = [depart], 0
+        while pile:
+            u = pile.pop()
+            taille += 1
+            for v in precedents[u]:
+                if groupe[v] < 0:
+                    groupe[v] = n
+                    pile.append(v)
+        if taille > taille_max:
+            meilleur, taille_max = n, taille
+        n += 1
+    return {i for i in range(nb_noeuds) if groupe[i] == meilleur}
+
+
 # ---------------------------------------------------------------------
 # Construction du réseau
 # ---------------------------------------------------------------------
@@ -264,17 +316,9 @@ def construire(elements, zone_badge):
 
     # 3) Tronçons entre deux points du réseau, avec leur forme (points intermédiaires)
     noms = {'': 0}
-    seg_a, seg_b = array('I'), array('I')
-    seg_longueur = array('H')
-    seg_voie = array('I')
-    seg_drapeaux = array('B')
-    seg_vitesse = array('B')
-    seg_limitation = array('B')
-    seg_sens = []
-    seg_debut_forme = array('I')
-    forme_lon, forme_lat = array('i'), array('i')
     voie_nom = array('I')
     voie_index = {}  # id OSM → numéro de voie
+    troncons = []    # (a, b, longueur, voie, drapeaux, vitesse, limitation, sens, forme)
     for (id_osm, refs, drapeaux, sens, vitesse, lim, nom, hw) in voies:
         iv = len(voie_nom)
         voie_index[id_osm] = iv
@@ -288,19 +332,48 @@ def construire(elements, zone_badge):
                 longueur = sum(distance_m(noeuds_osm[morceau[j]][0], noeuds_osm[morceau[j]][1],
                                           noeuds_osm[morceau[j + 1]][0], noeuds_osm[morceau[j + 1]][1])
                                for j in range(len(morceau) - 1))
-                seg_a.append(numero[morceau[0]])
-                seg_b.append(numero[morceau[-1]])
-                seg_longueur.append(min(65535, max(1, round(longueur))))
-                seg_voie.append(iv)
-                seg_drapeaux.append(drapeaux)
-                seg_vitesse.append(min(255, max(1, round(vitesse))))
-                seg_limitation.append(min(255, lim))
-                seg_sens.append(sens)
-                seg_debut_forme.append(len(forme_lon))
-                for r in morceau[1:-1]:
-                    forme_lon.append(round(noeuds_osm[r][0] * 1e6))
-                    forme_lat.append(round(noeuds_osm[r][1] * 1e6))
+                forme = [(round(noeuds_osm[r][0] * 1e6), round(noeuds_osm[r][1] * 1e6)) for r in morceau[1:-1]]
+                troncons.append((numero[morceau[0]], numero[morceau[-1]], longueur, iv, drapeaux, vitesse, lim, sens, forme))
                 debut = k
+
+    # 3 bis) On ne garde que le grand réseau où l'on peut aller et revenir partout
+    # (évite d'accrocher un départ à un bout de rue isolé, fermé par des barrières)
+    garde = composante_principale(nb_noeuds, troncons, noeud_drapeaux)
+    avant = len(troncons)
+    troncons = [t for t in troncons if t[0] in garde and t[1] in garde]
+    journal(f'Réseau principal : {len(garde)} points sur {nb_noeuds}, {len(troncons)} tronçons sur {avant}')
+    nouveau = {}
+    for ancien in sorted(garde):
+        nouveau[ancien] = len(nouveau)
+    noeud_lon = array('i', [noeud_lon[i] for i in sorted(garde)])
+    noeud_lat = array('i', [noeud_lat[i] for i in sorted(garde)])
+    noeud_drapeaux = array('B', [noeud_drapeaux[i] for i in sorted(garde)])
+    nb_noeuds = len(nouveau)
+    ancien_numero = numero
+    numero = {r: nouveau[i] for r, i in ancien_numero.items() if i in nouveau}
+
+    seg_a, seg_b = array('I'), array('I')
+    seg_longueur = array('H')
+    seg_voie = array('I')
+    seg_drapeaux = array('B')
+    seg_vitesse = array('B')
+    seg_limitation = array('B')
+    seg_sens = []
+    seg_debut_forme = array('I')
+    forme_lon, forme_lat = array('i'), array('i')
+    for (a, b, longueur, iv, drapeaux, vitesse, lim, sens, forme) in troncons:
+        seg_a.append(nouveau[a])
+        seg_b.append(nouveau[b])
+        seg_longueur.append(min(65535, max(1, round(longueur))))
+        seg_voie.append(iv)
+        seg_drapeaux.append(drapeaux)
+        seg_vitesse.append(min(255, max(1, round(vitesse))))
+        seg_limitation.append(min(255, lim))
+        seg_sens.append(sens)
+        seg_debut_forme.append(len(forme_lon))
+        for (x, y) in forme:
+            forme_lon.append(x)
+            forme_lat.append(y)
     seg_debut_forme.append(len(forme_lon))
     nb_seg = len(seg_a)
     journal(f'Tronçons : {nb_seg}, points de forme : {len(forme_lon)}, noms de rues : {len(noms)}')

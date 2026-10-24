@@ -52,6 +52,18 @@ for (const [de, a, obligatoire] of essais) {
   console.log(`   ${Math.round(r.duree / 60)} min, ${(r.distance / 1000).toFixed(1)} km — calcul ${r.ms} ms, ${r.explores} arêtes explorées`);
   console.log(`   zone piétonne : ${r.morceaux.some((m) => m.pieton) ? 'oui' : 'non'} · accès réservé : ${r.morceaux.some((m) => m.accesLimite) ? 'oui' : 'non'} · bornes badge : ${r.bornes.length}`);
   console.log(`   par : ${rues.slice(0, 14).join(' → ')}${rues.length > 14 ? ' → …' : ''}`);
+  // Détail rue par rue (longueur, vitesse retenue, P = piéton, R = accès réservé)
+  const depart = reseau.accrocher(lieux[de][0], lieux[de][1]), arrivee = reseau.accrocher(lieux[a][0], lieux[a][1]);
+  console.log(`   départ accroché à ${Math.round(depart.ecart)} m, arrivée à ${Math.round(arrivee.ecart)} m`);
+  if (r.distance < 6000) {
+    const detail = [];
+    r.morceaux.forEach((m) => {
+      const cle = (m.nom || '(sans nom)') + (m.pieton ? ' [P]' : '') + (m.accesLimite ? ' [R]' : '');
+      const d = detail[detail.length - 1];
+      if (d && d.cle === cle) d.longueur += m.longueur; else detail.push({ cle, longueur: m.longueur, vitesse: m.vitesse });
+    });
+    console.log('   détail : ' + detail.map((d) => `${d.cle} ${Math.round(d.longueur)} m à ${d.vitesse} km/h`).join(' | '));
+  }
   // Vérification de bon sens : vitesse moyenne entre 8 et 90 km/h
   const vitesse = r.distance / r.duree * 3.6;
   if (vitesse < 8 || vitesse > 90) { console.log(`   ÉCHEC : vitesse moyenne anormale (${vitesse.toFixed(0)} km/h)`); echecs++; }
