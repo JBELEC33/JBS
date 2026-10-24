@@ -483,24 +483,24 @@ body.en-navigation #etat-gps { display: none !important; }
 
 /* Barre du bas */
 .barre-trajet { flex-wrap: wrap; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
-.barre-infos { flex: 1; display: flex; justify-content: space-around; text-align: center; min-width: 0; }
-.barre-grand { font-size: 22px; font-weight: 800; }
-.barre-petit { font-size: 12px; color: var(--texte-doux); }
+.barre-infos { flex: 1 1 100%; display: flex; justify-content: space-around; gap: 6px; text-align: center; min-width: 0; }
+/* Chiffres sur une seule ligne, un peu plus petits sur les écrans étroits */
+.barre-grand { font-size: clamp(17px, 5.2vw, 22px); font-weight: 800; white-space: nowrap; }
+.barre-petit { font-size: 12px; color: var(--texte-doux); white-space: nowrap; }
 #nav-arrivee-prevue.en-retard { color: #ffa94d; font-weight: 700; }
-.bouton-secours { flex: none; width: 64px; height: 56px; font-size: 13px; line-height: 1.15; padding: 0; }
-.bouton-arreter { flex: none; height: 56px; padding: 0 14px; font-size: 17px; }
+.bouton-secours { flex: 1; height: 50px; font-size: 16px; padding: 0 8px; }
+.bouton-arreter { flex: 1; height: 50px; padding: 0 14px; font-size: 17px; }
 
 /* Vitesse et limitation, à gauche au-dessus de la barre */
 .nav-vitesse {
   position: absolute;
   left: calc(12px + env(safe-area-inset-left));
-  bottom: calc(96px + env(safe-area-inset-bottom));
+  bottom: calc(var(--barre-haut, 130px) + 10px); /* hauteur de la barre du bas, mesurée par navigation.js */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
 }
-body.en-navigation.avec-simulation .nav-vitesse { bottom: calc(150px + env(safe-area-inset-bottom)); }
 .compteur {
   width: 66px;
   height: 66px;
@@ -533,11 +533,11 @@ body.en-navigation.avec-simulation .nav-vitesse { bottom: calc(150px + env(safe-
 }
 
 /* Pendant la navigation : boutons « Recentrer » et « Ça ne va pas » à droite, au-dessus de la barre */
-body.en-navigation #bouton-recentrer { bottom: calc(96px + env(safe-area-inset-bottom)); }
+body.en-navigation #bouton-recentrer { bottom: calc(var(--barre-haut, 130px) + 10px); }
 body.en-navigation #bouton-probleme {
   left: auto;
   right: calc(12px + env(safe-area-inset-right));
-  bottom: calc(176px + env(safe-area-inset-bottom));
+  bottom: calc(var(--barre-haut, 130px) + 90px);
   height: 44px;
   padding: 0 12px;
   font-size: 14px;
@@ -581,7 +581,7 @@ body.en-navigation #bouton-bloque { display: none !important; }
 .nav-bloque {
   left: auto;
   right: calc(12px + env(safe-area-inset-right));
-  bottom: calc(232px + env(safe-area-inset-bottom));
+  bottom: calc(var(--barre-haut, 130px) + 146px);
   height: 44px;
   padding: 0 12px;
   font-size: 14px;

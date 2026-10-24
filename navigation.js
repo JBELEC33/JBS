@@ -352,6 +352,14 @@ const Navigation = (() => {
   // -------------------------------------------------------------------
   function installer(options) {
     ({ carte, etat, pointBleu, elementPoint, positionSimulee, revenirPositionReelle } = options);
+    // Hauteur réelle de la barre du bas (2 ou 3 lignes selon la simulation) : les boutons
+    // et le compteur de vitesse se placent juste au-dessus (variable CSS --barre-haut)
+    const barre = $('barre-trajet');
+    const mesurer = () => {
+      const h = barre.getBoundingClientRect().height;
+      if (h) document.documentElement.style.setProperty('--barre-haut', Math.round(h) + 'px');
+    };
+    if (window.ResizeObserver) new ResizeObserver(mesurer).observe(barre);
     ['dragstart', 'zoomstart', 'rotatestart', 'pitchstart'].forEach((ev) => carte.on(ev, interaction));
     // Doigt posé sur la carte : la caméra se met en pause pour laisser faire le geste
     const zone = carte.getCanvasContainer();
