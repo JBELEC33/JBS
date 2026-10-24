@@ -155,6 +155,17 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
   - La simulation est dans `navigation.js` ; à la fin d'une simulation, le point revient à la dernière vraie position GPS.
 - Les tests de `scripts/tester_itineraire.js` affichent aussi les consignes de chaque trajet.
 
+### Travaux (étape 5) : recherche faite le 24/10/2026, en attente de la décision de l'utilisatrice
+- **Bordeaux Métropole, jeu `ci_chantier`** (opendata.bordeaux-metropole.fr, API `api/explore/v2.1/catalog/datasets/ci_chantier/exports/json`) : chantiers **de Bordeaux et Mérignac uniquement** modifiant la circulation ; Licence Ouverte ; mis à jour chaque nuit (vers 3 h) ; 295 chantiers ce jour ; géométrie point (202) ou ligne (93) ; dates de début et de fin ; mesures dans `libelle` séparées par « ; », « / » ou « # » : Neutralisation de voie (90), Interdiction de stationnement (74), Circulation interdite (65), Limitation de vitesse (54), Rétrécissement de largeur de voie (43), Circulation alternée (43), Mesure libre circulation (39), Mise en impasse (24), Déviation, Circulation inversée, Interruption de circulation, Sens interdit… Jeux liés : `ci_acte_a`, `ci_emprise_a`, `ci_mesure_a`.
+- **`ci_evenmt_p` « Événement impactant la circulation »** : 3 enregistrements, dernière mise à jour juillet 2026 : inutilisable en l'état.
+- **`ci_borna_p` « Borne d'accès »** (419 bornes, Bordeaux) : utile plus tard pour affiner la règle des bornes.
+- **TomTom (conditions lues sur docs.tomtom.com/legal/terms-and-conditions le 24/10/2026)** :
+  - clause 2.1 : même en payant, la licence **exclut la « Navigation Functionality »** (guidage virage par virage selon la position) **et l'« Automotive Usage »**, sauf accord écrit séparé avec TomTom : c'est exactement l'usage de cette appli ;
+  - clause 2.2 : l'offre gratuite est réservée à l'« Evaluation Use » (évaluation et tests internes) ;
+  - clause 11.4 : mise en cache seulement selon les en-têtes de cache des réponses (pas une règle libre de 24 h) ;
+  - offre gratuite du Traffic Incidents API : **2 500 requêtes par mois** (et non par jour).
+  - Conclusion : TomTom n'est pas utilisé tant que l'utilisatrice n'a pas décidé (accord écrit de TomTom, ou autre source).
+
 ## Idées pour plus tard (ne pas faire maintenant)
 - **Bouton « Étape » pendant la conduite** : il ouvre une barre de recherche ; tous les commerces correspondants sont affichés le long de l'itinéraire, chacun avec un nouvel itinéraire optionnel (détour proposé, sans perdre la destination finale).
 - **Option pour choisir entre deux ou trois itinéraires** avant de partir.
