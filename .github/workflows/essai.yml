@@ -7,61 +7,24 @@ jobs:
   essai:
     runs-on: ubuntu-latest
     steps:
-      - name: Catalogue Bordeaux Métropole
-        run: |
-          B=https://opendata.bordeaux-metropole.fr/api/explore/v2.1
-          for mot in chantier travaux circulation evenement deviation fermeture perturbation; do
-            echo "=== recherche : $mot"
-            curl -sS -m 60 "$B/catalog/datasets?where=search(%22$mot%22)&limit=50" | python3 -c "
-          import json,sys
-          d=json.load(sys.stdin)
-          for r in d.get('results',[]):
-            m=r.get('metas',{}).get('default',{})
-            print(' -', r.get('dataset_id'), '|', m.get('title'), '|', m.get('modified'), '|', m.get('records_count'))
-          print('   total', d.get('total_count'), d.get('error_code',''), d.get('message',''))"
-          done
-      - name: Analyse des chantiers
-        run: |
-          B=https://opendata.bordeaux-metropole.fr/api/explore/v2.1
-          curl -sS -m 120 "$B/catalog/datasets/ci_chantier/exports/json" -o ch.json
-          python3 -c "
-          import json,collections
-          d=json.load(open('ch.json')); print('nb', len(d))
-          print('géométries', collections.Counter(r.get('geo_shape_type') for r in d))
-          print('types géo', collections.Counter((r.get('geo_shape') or {}).get('geometry',{}).get('type') for r in d))
-          c=collections.Counter()
-          for r in d:
-            for x in (r.get('libelle') or '').split(';'): c[x.strip()]+=1
-          print('mesures', c.most_common(40))
-          print('type emprise', collections.Counter(r.get('type_emprise') for r in d))
-          print('dates début min/max', min(r['date_debut'] for r in d if r.get('date_debut')), max(r['date_debut'] for r in d if r.get('date_debut')))
-          print('dates fin min/max', min(r['date_fin'] for r in d if r.get('date_fin')), max(r['date_fin'] for r in d if r.get('date_fin')))
-          print('idents distincts', len({r.get('ident') for r in d}))
-          for r in d[:3]: print(json.dumps(r, ensure_ascii=False)[:700])
-          "
       - name: Pages TomTom (rendues dans un navigateur)
         run: |
           python3 -m pip install --quiet --user --break-system-packages playwright
           python3 -m playwright install --with-deps chromium > /dev/null 2>&1
           cat > lire.py <<'PY'
-          import re, sys
+          import re
           from playwright.sync_api import sync_playwright
-          urls = ['https://docs.tomtom.com/legal/terms-and-conditions',
-                  'https://docs.tomtom.com/pricing',
-                  'https://docs.tomtom.com/traffic-api/documentation/tomtom-maps/product-information/introduction']
           with sync_playwright() as p:
             b = p.chromium.launch()
-            for u in urls:
+            for u in ['https://docs.tomtom.com/legal/terms-and-conditions', 'https://www.tomtom.com/en_gb/thirdpartyproductterms/']:
               pg = b.new_page()
               pg.goto(u, wait_until='networkidle', timeout=90000)
               pg.wait_for_timeout(4000)
               t = re.sub(r'\s+', ' ', pg.inner_text('body'))
               print('=================', u, len(t))
-              liens = pg.eval_on_selector_all('a', 'els => els.map(e => e.href).filter(h => /legal|terms|pdf|agreement/i.test(h))')
-              print('liens:', sorted(set(liens))[:40])
-              for mot in ['cach', 'stor', '24 hour', 'hours', 'statistic', 'historic', 'Traffic', 'free', 'per day', 'daily', 'requests', 'Location Data', 'domain', 'end user', 'personal']:
-                for m in list(re.finditer(re.escape(mot), t, re.I))[:3]:
-                  print('['+mot+']', t[max(0, m.start()-250):m.end()+300])
+              # une clause par ligne
+              for morceau in re.split(r'(?= \d{1,2}\.\d{1,2}(?:\.\d{1,2})?\. )|(?= "[A-Z][^"]{2,40}" means)', t):
+                print('§', morceau.strip()[:1200])
             b.close()
           PY
           python3 lire.py
