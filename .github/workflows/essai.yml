@@ -1,0 +1,36 @@
+# Essai temporaire (ne pas fusionner dans main) : mesure du réseau de rues
+name: Essai services
+on:
+  push:
+    branches: [claude/keen-bell-077ud9]
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comptages Overpass
+        run: |
+          H='motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link|pedestrian|busway'
+          compter() { curl -sS -m 900 -A "GPS-Bordeaux/1.0 (github.com/JBELEC33/JBS)" --data-urlencode "data=$1" https://overpass-api.de/api/interpreter | tr -d '\n' | grep -o '"tags": {[^}]*}' ; echo; }
+          echo "== Métropole (rectangle -0.85,44.70,-0.35,45.05) voies"; compter "[out:json][timeout:600];way[\"highway\"~\"^($H)$\"](44.70,-0.85,45.05,-0.35);out count;"
+          echo "== Métropole noeuds"; compter "[out:json][timeout:600];way[\"highway\"~\"^($H)$\"](44.70,-0.85,45.05,-0.35);node(w);out count;"
+          echo "== Gironde voies"; compter "[out:json][timeout:900];area[\"ISO3166-2\"=\"FR-33\"]->.g;way(area.g)[\"highway\"~\"^($H)$\"];out count;"
+          echo "== Gironde noeuds"; compter "[out:json][timeout:900];area[\"ISO3166-2\"=\"FR-33\"]->.g;way(area.g)[\"highway\"~\"^($H)$\"];node(w);out count;"
+          echo "== Gironde sans service"; compter "[out:json][timeout:900];area[\"ISO3166-2\"=\"FR-33\"]->.g;way(area.g)[\"highway\"~\"^($H)$\"][\"highway\"!=\"service\"];node(w);out count;"
+          echo "== Restrictions métropole"; compter "[out:json][timeout:600];relation[\"type\"=\"restriction\"](44.70,-0.85,45.05,-0.35);out count;"
+      - name: Bornes et accès dans Bordeaux centre
+        run: |
+          Q='[out:json][timeout:600];(node["barrier"](44.825,-0.595,44.860,-0.560););out tags;'
+          curl -sS -m 900 -A "GPS-Bordeaux/1.0" --data-urlencode "data=$Q" https://overpass-api.de/api/interpreter -o b.json
+          python3 -c "
+          import json,collections
+          d=json.load(open('b.json'))['elements']
+          c=collections.Counter((e['tags'].get('barrier'),e['tags'].get('bollard'),e['tags'].get('access'),e['tags'].get('motor_vehicle')) for e in d)
+          print(c.most_common(40))"
+          Q='[out:json][timeout:600];way["highway"](44.825,-0.595,44.860,-0.560);out tags;'
+          curl -sS -m 900 -A "GPS-Bordeaux/1.0" --data-urlencode "data=$Q" https://overpass-api.de/api/interpreter -o w.json
+          python3 -c "
+          import json,collections
+          d=json.load(open('w.json'))['elements']
+          c=collections.Counter((e['tags'].get('highway'),e['tags'].get('access'),e['tags'].get('motor_vehicle'),e['tags'].get('motorcar'),e['tags'].get('vehicle')) for e in d if e['tags'].get('highway') in ('pedestrian','residential','living_street','service','tertiary','secondary','primary','unclassified','busway'))
+          print(c.most_common(60))
+          m=collections.Counter(e['tags'].get('maxspeed') for e in d); print(m.most_common(20))"
