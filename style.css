@@ -230,6 +230,7 @@ body.en-recherche #etat-gps { display: none !important; }
   color: var(--texte);
   font-family: inherit;
   font-size: 19px;
+  outline: none;
   -webkit-appearance: none;
   appearance: none;
 }
@@ -266,6 +267,7 @@ body.en-recherche #etat-gps { display: none !important; }
 }
 .recherche-panneau.plein { top: calc(70px + env(safe-area-inset-top)); border-radius: 0; }
 .recherche-panneau.moitie { top: 52%; }
+.recherche-panneau.moitie.avec-fiche { top: 38%; }
 .poignee { padding: 8px 0 4px; display: flex; justify-content: center; flex: none; }
 .poignee span { width: 44px; height: 5px; border-radius: 3px; background: #4a5e86; }
 .recherche-panneau.plein .poignee { display: none; }

@@ -30,7 +30,7 @@ if (moteur.nombre < 10000) { console.log('ÉCHEC : trop peu de lieux'); echecs++
 const essais = [
   ['boulangerie', true], ['boulengerie', true], ['pharmacie', true], ['CPAM', true], ['cpam', true],
   ['musée', true], ["musee d'aquitaine", true], ['place de la Bourse', false], ['mairie merignac', true],
-  ['préfecture', true], ['pole emploi', true], ['france travail', true], ['CHU', true], ['CAF', false],
+  ['préfecture', true], ['pole emploi', true], ['france travail', true], ['CHU', true], ['CAF', true],
   ['Auchan', true], ['Leclerc', false], ['Decathlon', false], ['station essence', true], ['parking', true],
   ['boul', true], ['urssaf', false]
 ];
@@ -53,7 +53,7 @@ async function adresses(texte) {
     console.log(`\n« ${texte} » : ${res.length} lieu(x) en ${duree} ms${moteur.estCategorie(texte) ? ' [catégorie]' : ''}`);
     res.slice(0, 5).forEach((r) => {
       const h = r.horaires ? Horaires.etat(r.horaires) : null;
-      console.log(`   - ${r.nom} | ${r.type} | ${[r.adresse, r.commune].filter(Boolean).join(', ')} | ${km(r.distance)}${h ? ' | ' + h.texte : ''}${r.qualite ? ' (approché)' : ''}`);
+      console.log(`   - ${r.nom} | ${r.type} | ${[r.adresse, r.commune].filter(Boolean).join(', ')} | ${km(r.distance)}${h ? ' | ' + h.texte : ''}${['', ' (début de mot)', ' (approché)'][r.qualite]}`);
     });
     if (obligatoire && !res.length) { console.log('   ÉCHEC : aucun résultat'); echecs++; }
   }

@@ -132,17 +132,22 @@
     const principal = preparer(index);
     const parCommune = preparer(indexCommune);
 
-    // Tous les lieux dont un mot commence par « tape » (qualité 0) ou s'en approche (qualité 1)
+    // Tous les lieux qui correspondent au mot tapé, avec une note de qualité :
+    // 0 = mot identique (« chu » → CHU), 1 = début de mot (« chu » → « chut »), 2 = mot approché (faute de frappe)
     function correspondances(source, tape, resultat) {
       const { table, vocabulaire, parLettre } = source;
-      // 1) mots qui commencent exactement par ce qui est tapé (recherche dichotomique)
+      // 1) mots identiques ou qui commencent par ce qui est tapé (recherche dichotomique dans la liste triée)
       let bas = 0, haut = vocabulaire.length;
       while (bas < haut) {
         const milieu = (bas + haut) >> 1;
         if (vocabulaire[milieu] < tape) bas = milieu + 1; else haut = milieu;
       }
       for (let k = bas; k < vocabulaire.length && vocabulaire[k].startsWith(tape); k++) {
-        for (const i of table.get(vocabulaire[k])) resultat.set(i, 0);
+        const q = vocabulaire[k] === tape ? 0 : 1;
+        for (const i of table.get(vocabulaire[k])) {
+          const avant = resultat.get(i);
+          if (avant === undefined || q < avant) resultat.set(i, q);
+        }
       }
       // 2) mots proches (fautes de frappe), seulement pour les mots d'au moins 4 lettres
       const max = fautesPermises(tape.length);
@@ -150,7 +155,7 @@
         for (const mot of parLettre.get(tape[0]) || []) {
           if (mot.startsWith(tape)) continue;
           if (fautesDebut(tape, mot, max) <= max) {
-            for (const i of table.get(mot)) if (!resultat.has(i)) resultat.set(i, 1);
+            for (const i of table.get(mot)) if (!resultat.has(i)) resultat.set(i, 2);
           }
         }
       }
@@ -160,7 +165,7 @@
     // -----------------------------------------------------------------
     // Recherche
     // -----------------------------------------------------------------
-    // position : { lon, lat } ; renvoie les lieux triés (exacts d'abord, puis du plus proche au plus loin)
+    // position : { lon, lat } ; renvoie les lieux triés : les mieux notés d'abord, puis du plus proche au plus loin
     function chercher(texte, position, limite) {
       let tapes = decouper(texte);
       const utiles = tapes.filter((m) => !MOTS_VIDES.has(m));

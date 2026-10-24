@@ -142,7 +142,7 @@ const Recherche = (() => {
           lat: f.geometry.coordinates[1],
           adresse: '',
           commune: f.properties.postcode + ' ' + f.properties.city,
-          qualite: f.properties.score >= 0.7 ? 0 : 1
+          qualite: f.properties.score >= 0.7 ? 0 : (f.properties.score >= 0.5 ? 1 : 2)
         }));
       // Lieux et adresses mélangés : les plus sûrs d'abord, puis du plus proche au plus loin
       resultats = lieux.concat(adresses).sort((a, b) => a.qualite - b.qualite || a.distance - b.distance);
@@ -234,10 +234,14 @@ const Recherche = (() => {
     carte.fitBounds(zone, { padding: marges, maxZoom: 16, duration: 600 });
   }
 
+  // Place libre pour la carte : entre la barre du haut et le panneau du bas.
+  // (On calcule d'après la position finale du panneau, pas pendant qu'il glisse.)
   function margesCarte() {
+    const hauteur = window.innerHeight;
     const haut = $('recherche-haut').getBoundingClientRect().bottom + 30;
-    const bas = window.innerHeight - $('recherche-panneau').getBoundingClientRect().top + 30;
-    return { top: haut, bottom: Math.max(bas, 40), left: 40, right: 40 };
+    const partPanneau = $('recherche-panneau').classList.contains('avec-fiche') ? 0.62 : 0.48;
+    const bas = Math.round(hauteur * partPanneau) + 30;
+    return { top: haut, bottom: Math.min(bas, hauteur - haut - 60), left: 40, right: 40 };
   }
 
   // Le panneau du bas : « plein » (liste sur tout l'écran) ou « moitié » (la carte visible au-dessus)
@@ -245,6 +249,7 @@ const Recherche = (() => {
     const panneau = $('recherche-panneau');
     panneau.classList.toggle('plein', mode === 'plein');
     panneau.classList.toggle('moitie', mode === 'moitie');
+    panneau.classList.toggle('avec-fiche', mode === 'moitie' && !!choisi);
   }
 
   // -------------------------------------------------------------------
@@ -313,6 +318,7 @@ const Recherche = (() => {
     champ.readOnly = !!roule();
     $('recherche-avertissement').classList.toggle('cache', !roule());
     modePanneau('plein');
+    champ.value = ''; // on repart de zéro : les recherches récentes s'affichent
     lancer();
     if (!champ.readOnly) champ.focus();
   }

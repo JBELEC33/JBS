@@ -104,12 +104,25 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 À la fin de chaque étape : résumé de ce qui marche, de ce qui reste, et instructions de test sur l'iPhone.
 
 ## État d'avancement et choix déjà faits
-- **Étape 1 faite** (carte + position + bouton « Ça ne va pas » + mise en ligne).
+- **Étape 1 faite** (carte + position + bouton « Ça ne va pas » + mise en ligne). Validée sur l'iPhone.
+- **Étape 2 faite** (recherche) : à valider sur l'iPhone.
 - Fond de carte en ligne : **OpenFreeMap** (tiles.openfreemap.org, gratuit, sans clé, données OSM), style `dark` si l'iPhone est en mode sombre, `liberty` sinon. Sera complété par la carte hors ligne à l'étape 6.
 - MapLibre GL JS est copié dans `vendor/maplibre/` (pas de CDN).
-- Mise en ligne : workflow `.github/workflows/pages.yml` (GitHub Pages, source « GitHub Actions »), déclenché à chaque push sur `main`.
+- Mise en ligne : workflow `.github/workflows/pages.yml` (GitHub Pages, source « GitHub Actions »), déclenché à chaque push sur `main`, chaque lundi (refait le fichier des lieux) et à la main (`workflow_dispatch`, option « refaire_donnees »).
+- **Fichiers de données produits par GitHub Actions** : jamais enregistrés dans le dépôt (dossier `donnees/` ignoré). Ils sont rangés dans la release GitHub « donnees » (ne pas la supprimer) et recopiés dans le site à chaque mise en ligne. Même principe à suivre pour le fichier des rues (étape 3).
 - **Numéro de version** : constante `VERSION` dans `app.js`, affichée en bas de la fenêtre « Ça ne va pas ». L'augmenter à chaque mise en ligne, ainsi que le nom `CACHE` dans `sw.js` quand la liste des fichiers change.
-- Rapports « Ça ne va pas » : stockés dans `localStorage` (clé `gps-bordeaux-rapports`), exportés en fichier JSON via le menu Partager de l'iPhone.
+- Rapports « Ça ne va pas » : stockés dans `localStorage` (clé `gps-bordeaux-rapports`), exportés en fichier JSON via le menu Partager de l'iPhone. Ils contiennent aussi l'état de la recherche.
+- L'environnement de Claude Code n'a pas accès à internet (sauf GitHub) : les tests avec de vraies données se font dans GitHub Actions (`scripts/tester_recherche.js`, résultats lisibles dans le journal de l'action).
+
+### Recherche (étape 2)
+- Adresses : **Géoplateforme IGN** `https://data.geopf.fr/geocodage/search` (Base Adresse Nationale ; l'ancienne adresse api-adresse.data.gouv.fr est abandonnée), paramètres `index=address&autocomplete=1&depcode=33`. Seul le texte tapé est envoyé.
+- Lieux : `scripts/preparer_lieux.py` (Python standard) interroge Overpass (zone `ISO3166-2=FR-33`), garde les types listés dans `listes/categories.json`, complète les adresses manquantes par recherche inverse BAN en lot (coordonnées des commerces seulement), et écrit `donnees/lieux.json` (format compact : tables `types` et `communes` + lignes `[nom, type, lon, lat, adresse, commune, horaires, autres noms]`).
+- `listes/categories.json` : type OSM → nom français + synonymes (+ `sansNom` pour garder les lieux sans nom). Modifier ce fichier refait le fichier des lieux à la mise en ligne suivante.
+- `listes/sigles.json` : sigles et noms courants (CPAM, CAF…), à compléter librement ; pris en compte directement par le téléphone.
+- `moteur-recherche.js` : index en mémoire sur le téléphone, recherche par début de mot, fautes tolérées (1 faute dès 4 lettres, 2 dès 8, la première lettre doit être juste), classement : correspondances exactes d'abord, puis du plus proche au plus loin.
+- `horaires.js` : lit les horaires OSM courants ; si l'écriture est trop complexe, rien n'est affiché.
+- « Y aller » : en attendant l'itinéraire (étape 3), propose d'ouvrir la destination dans Waze ou Plans.
+- Clavier bloqué au-dessus de 15 km/h (sécurité) ; les recherches récentes restent utilisables.
 
 ## Idées pour plus tard (ne pas faire maintenant)
 - **Bouton « Étape » pendant la conduite** : il ouvre une barre de recherche ; tous les commerces correspondants sont affichés le long de l'itinéraire, chacun avec un nouvel itinéraire optionnel (détour proposé, sans perdre la destination finale).

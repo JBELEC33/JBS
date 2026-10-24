@@ -1105,10 +1105,10 @@
   ]
  },
  "office=employment_agency": {
-  "nom": "Agence pour l'emploi",
+  "nom": "Agence d'intérim",
   "mots": [
-   "emploi",
-   "interim"
+   "interim",
+   "recrutement"
   ]
  },
  "office=insurance": {
@@ -1736,8 +1736,9 @@
   ]
  },
  "government=employment_agency": {
-  "nom": "Agence pour l'emploi",
+  "nom": "France Travail",
   "mots": [
+   "pole emploi",
    "emploi"
   ]
  },
