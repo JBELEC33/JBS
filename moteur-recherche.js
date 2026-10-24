@@ -94,7 +94,8 @@
       types: new Set((s.categories || []).map((code) => types.indexOf(code)).filter((i) => i >= 0))
     }));
 
-    const index = new Map();         // mot → liste des lieux dont le nom, le type ou le sigle contient ce mot
+    const index = new Map();         // mot → liste des lieux dont le nom contient ce mot
+    const indexMotsCles = new Map(); // mot → liste des lieux dont le type ou le sigle contient ce mot (« boulangerie », « chu »)
     const indexCommune = new Map();  // mot → liste des lieux de cette commune
 
     function ajouter(table, mot, i) {
@@ -107,14 +108,15 @@
       const l = lieux[i];
       const texteNom = normaliser((l[0] || '') + ' ' + (l[7] || ''));
       const mots = new Set(texteNom ? texteNom.split(' ') : []);
-      motsDuType[l[1]].forEach((m) => mots.add(m));
+      const motsCles = new Set(motsDuType[l[1]]);
       const avecEspaces = ' ' + texteNom + ' ';
       for (const regle of reglesSigles) {
         if (regle.types.has(l[1]) || regle.phrases.some((p) => avecEspaces.includes(p))) {
-          regle.mots.forEach((m) => mots.add(m));
+          regle.mots.forEach((m) => motsCles.add(m));
         }
       }
       mots.forEach((m) => { if (!MOTS_VIDES.has(m)) ajouter(index, m, i); });
+      motsCles.forEach((m) => ajouter(indexMotsCles, m, i));
       const c = l[5] >= 0 ? communes[l[5]] : '';
       decouper(c).forEach((m) => { if (!MOTS_VIDES.has(m)) ajouter(indexCommune, m, i); });
     }
@@ -127,13 +129,18 @@
         if (!parLettre.has(m[0])) parLettre.set(m[0], []);
         parLettre.get(m[0]).push(m);
       });
-      return { table, vocabulaire, parLettre };
+      return { table, vocabulaire, parLettre, motsCles: table === indexMotsCles };
     }
-    const principal = preparer(index);
+    const parNom = preparer(index);
+    const parMotCle = preparer(indexMotsCles);
     const parCommune = preparer(indexCommune);
 
     // Tous les lieux qui correspondent au mot tapé, avec une note de qualité :
-    // 0 = mot identique (« chu » → CHU), 1 = début de mot (« chu » → « chut »), 2 = mot approché (faute de frappe)
+    // 0 = type de lieu ou sigle tapé en entier (« chu », « boulangerie »),
+    // 1 = début de mot ou nom de lieu (« boul » → boulangeries, « auchan »),
+    // 2 = mot approché (faute de frappe).
+    // Ainsi « boul » montre les boulangeries proches avant « Boul'Ange » à 12 km,
+    // mais « CHU » montre les hôpitaux avant « Resto Chut ».
     function correspondances(source, tape, resultat) {
       const { table, vocabulaire, parLettre } = source;
       // 1) mots identiques ou qui commencent par ce qui est tapé (recherche dichotomique dans la liste triée)
@@ -143,7 +150,7 @@
         if (vocabulaire[milieu] < tape) bas = milieu + 1; else haut = milieu;
       }
       for (let k = bas; k < vocabulaire.length && vocabulaire[k].startsWith(tape); k++) {
-        const q = vocabulaire[k] === tape ? 0 : 1;
+        const q = source.motsCles && vocabulaire[k] === tape ? 0 : 1;
         for (const i of table.get(vocabulaire[k])) {
           const avant = resultat.get(i);
           if (avant === undefined || q < avant) resultat.set(i, q);
@@ -174,7 +181,7 @@
 
       // Pour chaque mot tapé : lieux trouvés par le nom/type/sigle, et lieux trouvés par la commune
       const parMot = tapes.map((t) => ({
-        nom: correspondances(principal, t, new Map()),
+        nom: correspondances(parNom, t, correspondances(parMotCle, t, new Map())),
         commune: t.length >= 3 ? correspondances(parCommune, t, new Map()) : new Map()
       }));
 
