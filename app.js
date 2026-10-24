@@ -49,6 +49,12 @@ const carte = new maplibregl.Map({
 });
 // Crédits obligatoires (OpenStreetMap…), repliés dans un petit « i »
 carte.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+// Une fois le fond de carte chargé, les crédits sont repliés dans le « i » (sinon ils cachent les boutons)
+function replierCredits() {
+  const credits = document.querySelector('.maplibregl-ctrl-attrib');
+  if (credits) credits.classList.remove('maplibregl-compact-show');
+}
+carte.on('style.load', () => carte.once('idle', replierCredits));
 
 // Fond de carte retouché pour la conduite (jour / nuit selon le mode de l'iPhone)
 StyleCarte.installer(carte);

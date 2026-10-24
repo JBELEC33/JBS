@@ -24,7 +24,7 @@ const StyleCarte = (() => {
       rue: '#ffffff', rueBord: '#bfb8ae', service: '#ffffff', serviceBord: '#d2ccc3',
       chemin: '#f3efe9', rail: '#b5b5b5', limite: '#9a9a9a',
       texteGrand: '#2b2b2b', texteRue: '#454545', texteAutre: '#555', halo: 'rgba(255,255,255,0.95)',
-      fleche: '#4f6280'
+      fleche: '#4f6280', motifPieton: 0.35
     },
     nuit: {
       fond: '#1e2735', eau: '#1c3b5a', riviere: '#2a5478', vert: '#21372b', bois: '#1f3428',
@@ -35,7 +35,7 @@ const StyleCarte = (() => {
       rue: '#5e6b84', rueBord: '#273041', service: '#4b566b', serviceBord: '#232b3a',
       chemin: '#3d4859', rail: '#4d5464', limite: '#5a6580',
       texteGrand: '#f1f4f9', texteRue: '#dfe5ee', texteAutre: '#b9c2d0', halo: 'rgba(30,39,53,0.95)',
-      fleche: '#d2dbea'
+      fleche: '#d2dbea', motifPieton: 0.12
     }
   };
 
@@ -96,6 +96,8 @@ const StyleCarte = (() => {
           const couleur = couleurSurface(c.id, t);
           if (couleur) { p['fill-color'] = couleur; delete p['fill-outline-color']; if (c.id === 'building') p['fill-outline-color'] = t.batimentBord; }
           if (c.id === 'park') p['fill-opacity'] = 1;
+          // Hachures des places piétonnes : discrètes (trop voyantes sinon, surtout la nuit)
+          if (c.id === 'road_area_pattern') p['fill-opacity'] = t.motifPieton;
         }
         if (c.type === 'line') {
           if (/^waterway/.test(c.id)) p['line-color'] = t.riviere;

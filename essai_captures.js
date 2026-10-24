@@ -17,7 +17,8 @@ const { chromium, devices } = require('playwright');
     console.log(scheme, 'panneaux du trajet :', await p.evaluate(() => Panneaux.affiches()), 'sur', await p.evaluate(() => Panneaux.nombre()));
     await p.screenshot({ path: `resultats/${scheme}-apercu.png` });
     await p.tap('#trajet-simuler');
-    await p.waitForTimeout(9000);
+    await p.waitForTimeout(25000);
+    console.log(scheme, 'zoom en navigation :', await p.evaluate(() => carte.getZoom().toFixed(1)));
     await p.screenshot({ path: `resultats/${scheme}-navigation.png` });
     await ctx.close();
   }
