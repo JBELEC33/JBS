@@ -1,0 +1,37 @@
+# Essai temporaire (ne pas fusionner dans main) : vérifie les services utilisés par la recherche
+name: Essai services
+on:
+  push:
+    branches: [claude/keen-bell-077ud9]
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    steps:
+      - name: BAN
+        run: |
+          for u in "https://api-adresse.data.gouv.fr/search/?q=12+rue+sainte+catherine+bordeaux&limit=2" "https://data.geopf.fr/geocodage/search?q=12+rue+sainte+catherine+bordeaux&limit=2&index=address" "https://data.geopf.fr/geocodage/search?q=place+de+la+bourse&limit=5&index=address" "https://api-adresse.data.gouv.fr/search/?q=place+de+la+bourse&limit=5"; do
+            echo "== $u"; curl -sS -m 20 -D - "$u" | head -c 2500; echo; done
+      - name: BAN reverse csv
+        run: |
+          printf 'lat,lon\n44.8412,-0.5700\n44.8378,-0.5792\n' > t.csv
+          for u in https://api-adresse.data.gouv.fr/reverse/csv/ https://data.geopf.fr/geocodage/reverse/csv; do
+            echo "== $u"; curl -sS -m 60 -X POST -F data=@t.csv "$u" | head -c 1500; echo; done
+      - name: Overpass
+        run: |
+          Q='[out:json][timeout:600];area["ISO3166-2"="FR-33"]->.g;(nwr(area.g)["name"]["shop"];nwr(area.g)["name"]["amenity"];nwr(area.g)["name"]["tourism"];nwr(area.g)["name"]["office"];nwr(area.g)["name"]["leisure"];nwr(area.g)["name"]["healthcare"];nwr(area.g)["name"]["craft"];nwr(area.g)["shop"="bakery"];nwr(area.g)["amenity"="pharmacy"];);out center tags;'
+          time curl -sS -m 900 --data-urlencode "data=$Q" https://overpass-api.de/api/interpreter -o o.json
+          ls -la o.json; gzip -k o.json; ls -la o.json.gz
+          python3 -c "
+          import json,collections
+          d=json.load(open('o.json'))['elements']; print('elements',len(d))
+          c=collections.Counter()
+          for e in d:
+            t=e.get('tags',{})
+            for k in ('shop','amenity','tourism','office','leisure','healthcare','craft'):
+              if k in t: c[k+'='+t[k]]+=1; break
+          print(c.most_common(250))
+          print('avec addr:city', sum(1 for e in d if 'addr:city' in e.get('tags',{})), 'avec addr:street', sum(1 for e in d if 'addr:street' in e.get('tags',{})), 'avec horaires', sum(1 for e in d if 'opening_hours' in e.get('tags',{})))
+          for e in d:
+            n=e.get('tags',{}).get('name','')
+            if any(s in n for s in ('CPAM','Caisse primaire','CAF','Allocations','URSSAF','France Travail','Pôle','Préfecture','CHU','Pellegrin')): print(n, {k:v for k,v in e['tags'].items() if k in ('amenity','office','operator','healthcare','government','short_name','official_name','alt_name')})
+          "
