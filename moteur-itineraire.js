@@ -17,6 +17,9 @@
   const PENALITE_DROITE = 5, PENALITE_GAUCHE = 10, PENALITE_SERRE = 18, PENALITE_DEMI_TOUR = 40;
   const PENALITE_BORNE = 15; // le temps de passer la borne avec le badge
   const DISTANCE_ACCROCHE_MAX = 1500; // au-delà, le point est trop loin des rues connues (mètres)
+  // Travaux : rue en travaux mais ouverte = temps × 1,8 + 20 s ; rue fermée = infranchissable
+  const TRAVAUX_FERME = 1, TRAVAUX_RALENTI = 2;
+  const FACTEUR_RALENTI = 1.8, AJOUT_RALENTI = 20;
 
   // Conversion degrés → mètres autour de Bordeaux (suffisant à l'échelle de l'agglomération)
   const LAT0 = 44.85 * Math.PI / 180;
@@ -138,7 +141,7 @@
     // -----------------------------------------------------------------
     // Accrocher un point GPS à la rue la plus proche
     // -----------------------------------------------------------------
-    function accrocher(lon, lat) {
+    function accrocher(lon, lat, brut) {
       const x = Math.round(lon * 1e6), y = Math.round(lat * 1e6);
       const cx = Math.floor(x / CASE_LON), cy = Math.floor(y / CASE_LAT);
       let meilleur = null;
@@ -160,7 +163,7 @@
                 const f = l2 > 0 ? Math.min(1, Math.max(0, -(ax * dxs + ay * dys) / l2)) : 0;
                 let d = Math.hypot(ax + dxs * f, ay + dys * f);
                 // On préfère légèrement les rues ordinaires aux zones piétonnes
-                if (t.tronconDrapeaux[s] & (PIETON | ACCES_LIMITE)) d += 15;
+                if (!brut && t.tronconDrapeaux[s] & (PIETON | ACCES_LIMITE)) d += 15;
                 if (!meilleur || d < meilleur.ecart) {
                   const position = cumul[k / 2 - 1] + (cumul[k / 2] - cumul[k / 2 - 1]) * f;
                   meilleur = {
@@ -207,6 +210,61 @@
     }
 
     // -----------------------------------------------------------------
+    // Travaux : chaque tronçon peut être fermé ou ralenti
+    // -----------------------------------------------------------------
+    const tronconTravaux = new Uint8Array(nbTroncons);   // 0 rien, 1 fermé, 2 ralenti
+    const tronconChantier = new Map();                    // tronçon → chantier (pour les alertes)
+
+    // Temps de parcours d'une arête, travaux compris
+    function duree(e) {
+      const etat = tronconTravaux[t.areteTroncon[e] >> 1];
+      return etat === TRAVAUX_RALENTI ? areteDuree[e] * FACTEUR_RALENTI + AJOUT_RALENTI : areteDuree[e];
+    }
+
+    // liste : [{ id, effet: 'ferme' | 'ralenti', texte, geo: [[[lon, lat], …], …] }]
+    // Un chantier ponctuel touche la rue la plus proche (à moins de 30 m) ;
+    // un chantier en ligne touche les rues qu'il longe (points tous les 8 m, à moins de 12 m,
+    // et dans la même direction : les rues qui le croisent ne sont pas touchées).
+    function definirTravaux(liste) {
+      tronconTravaux.fill(0);
+      tronconChantier.clear();
+      let fermes = 0, ralentis = 0;
+      const marquer = (s, c) => {
+        const etat = c.effet === 'ferme' ? TRAVAUX_FERME : TRAVAUX_RALENTI;
+        // Une fermeture l'emporte sur un ralentissement
+        if (!tronconTravaux[s] || etat === TRAVAUX_FERME) {
+          if (!tronconTravaux[s]) { if (etat === TRAVAUX_FERME) fermes++; else ralentis++; }
+          else if (tronconTravaux[s] === TRAVAUX_RALENTI && etat === TRAVAUX_FERME) { ralentis--; fermes++; }
+          tronconTravaux[s] = etat;
+          tronconChantier.set(s, c);
+        }
+      };
+      for (const c of liste || []) {
+        if (c.effet !== 'ferme' && c.effet !== 'ralenti') continue;
+        for (const partie of c.geo || []) {
+          if (partie.length === 1) {
+            const a = accrocher(partie[0][0], partie[0][1], true);
+            if (a && a.ecart <= 30) marquer(a.troncon, c);
+            continue;
+          }
+          for (let k = 1; k < partie.length; k++) {
+            const [x1, y1] = partie[k - 1], [x2, y2] = partie[k];
+            const l = Math.hypot((x2 - x1) * MX * 1e6, (y2 - y1) * MY * 1e6);
+            const n = Math.max(1, Math.ceil(l / 8));
+            const capLigne = cap(x1 * 1e6, y1 * 1e6, x2 * 1e6, y2 * 1e6);
+            for (let i = 0; i <= n; i++) {
+              const a = accrocher(x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n, true);
+              if (!a || a.ecart > 12) continue;
+              const ecartCap = Math.abs(((a.cap - capLigne + 540) % 360) - 180);
+              if (ecartCap < 35 || ecartCap > 145) marquer(a.troncon, c); // même direction (dans un sens ou l'autre)
+            }
+          }
+        }
+      }
+      return { fermes, ralentis };
+    }
+
+    // -----------------------------------------------------------------
     // Recherche A* : chaque « état » est une arête parcourue jusqu'au bout
     // -----------------------------------------------------------------
     const cout = new Float64Array(nbAretes);
@@ -250,8 +308,8 @@
         if (options.cap == null) return 0;
         return Math.abs(((capRue - options.cap + 540) % 360) - 180) > 100 ? PENALITE_DEMI_TOUR + 30 : 0;
       };
-      if (eAvant >= 0) toucher(eAvant, (1 - a.fraction) * areteDuree[eAvant] + demiTour(a.cap), -1);
-      if (eArriere >= 0) toucher(eArriere, a.fraction * areteDuree[eArriere] + demiTour(a.cap + 180), -1);
+      if (eAvant >= 0) toucher(eAvant, (1 - a.fraction) * duree(eAvant) + demiTour(a.cap), -1);
+      if (eArriere >= 0) toucher(eArriere, a.fraction * duree(eArriere) + demiTour(a.cap + 180), -1);
 
       // Arrivée : on entre dans le tronçon d'arrivée par un bout ou par l'autre
       const dAvant = areteDuTroncon[b.troncon * 2], dArriere = areteDuTroncon[b.troncon * 2 + 1];
@@ -259,9 +317,9 @@
 
       // Cas particulier : départ et arrivée sur le même tronçon, dans le bon sens
       if (a.troncon === b.troncon) {
-        if (dAvant >= 0 && b.fraction >= a.fraction) { meilleur = (b.fraction - a.fraction) * areteDuree[dAvant]; finale = dAvant; direct = true; }
+        if (dAvant >= 0 && b.fraction >= a.fraction) { meilleur = (b.fraction - a.fraction) * duree(dAvant); finale = dAvant; direct = true; }
         if (dArriere >= 0 && b.fraction <= a.fraction) {
-          const c = (a.fraction - b.fraction) * areteDuree[dArriere];
+          const c = (a.fraction - b.fraction) * duree(dArriere);
           if (c < meilleur) { meilleur = c; finale = dArriere; direct = true; }
         }
       }
@@ -280,14 +338,15 @@
           if (d < 0 || areteSource[d] !== v) continue;
           const p = passage(e, d);
           if (p < 0) continue;
-          const c = cout[e] + p + part * areteDuree[d];
+          const c = cout[e] + p + part * duree(d);
           if (c < meilleur) { meilleur = c; derniere = e; finale = d; direct = false; }
         }
         for (let g = t.debutAretes[v]; g < t.debutAretes[v + 1]; g++) {
           if (ferme[g] === numeroRecherche) continue;
+          if (tronconTravaux[t.areteTroncon[g] >> 1] === TRAVAUX_FERME) continue; // rue fermée par des travaux
           const p = passage(e, g);
           if (p < 0) continue;
-          toucher(g, cout[e] + p + areteDuree[g], e);
+          toucher(g, cout[e] + p + duree(g), e);
         }
       }
       if (meilleur === Infinity) return { erreur: 'aucun', message: "Aucun itinéraire autorisé n'a été trouvé." };
@@ -306,7 +365,7 @@
     }
 
     // Transforme la liste d'arêtes en trajet affichable : morceaux de ligne, bornes, distance, durée
-    function construireTrajet(chemin, finale, a, b, direct, duree, explores, ms) {
+    function construireTrajet(chemin, finale, a, b, direct, dureeTotale, explores, ms) {
       const morceaux = [];
       const ajouter = (e, de, jusqua) => {
         const s = t.areteTroncon[e] >> 1;
@@ -316,7 +375,9 @@
         morceaux.push({
           coords,
           longueur: t.tronconLongueur[s] * (jusqua - de),
-          duree: areteDuree[e] * (jusqua - de),
+          duree: duree(e) * (jusqua - de),
+          travaux: tronconTravaux[s],                       // 0 rien, 1 fermé (départ/arrivée dedans), 2 ralenti
+          chantier: tronconChantier.get(s) || null,
           pieton: !!(t.tronconDrapeaux[s] & PIETON),
           accesLimite: !!(t.tronconDrapeaux[s] & ACCES_LIMITE),
           rondPoint: !!(t.tronconDrapeaux[s] & ROND_POINT),
@@ -343,10 +404,14 @@
         const v = t.areteCible[e];
         if (t.noeudDrapeaux[v] & BORNE_BADGE) bornes.push([t.noeudLon[v] / 1e6, t.noeudLat[v] / 1e6]);
       }
+      // Chantiers rencontrés sur le trajet (une seule fois chacun)
+      const chantiers = [];
+      morceaux.forEach((m) => { if (m.chantier && !chantiers.includes(m.chantier)) chantiers.push(m.chantier); });
       return {
         morceaux,
         bornes,
-        duree,
+        chantiers,
+        duree: dureeTotale,
         distance: morceaux.reduce((x, m) => x + m.longueur, 0),
         depart: [a.lon, a.lat],
         arrivee: [b.lon, b.lat],
@@ -358,6 +423,9 @@
     return {
       calculer,
       accrocher,
+      definirTravaux,
+      etatTravaux: (s) => tronconTravaux[s],
+      nomTroncon: (s) => entete.noms[t.voieNom[t.tronconVoie[s]]] || '',
       date: entete.date,
       nbNoeuds, nbTroncons, nbAretes,
       zoneCouverte: entete.zoneCouverte

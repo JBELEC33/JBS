@@ -1,0 +1,16 @@
+# Essai temporaire (ne pas fusionner dans main) : travaux réels sur les vraies rues
+name: Essai services
+on:
+  push:
+    branches: [claude/keen-bell-077ud9]
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: gh release download donnees -p rues.bin -D donnees
+      - run: python3 scripts/preparer_travaux.py
+      - run: node scripts/tester_travaux.js donnees/rues.bin donnees/travaux.json
+      - run: node scripts/tester_itineraire.js donnees/rues.bin | tail -5

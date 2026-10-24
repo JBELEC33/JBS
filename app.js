@@ -4,7 +4,7 @@
 
 // Numéro de version, affiché dans la fenêtre « Ça ne va pas ».
 // À changer à chaque mise en ligne pour vérifier que l'iPhone a bien la dernière version.
-const VERSION = '4.0 (étape 4 : guidage)';
+const VERSION = '5.0 (étape 5 : travaux)';
 
 // Centre de Bordeaux (place de la Comédie), au format [longitude, latitude]
 const BORDEAUX = [-0.5747, 44.8425];
@@ -197,6 +197,7 @@ function etatPourRapport() {
     trajet: etat.trajet,
     simulation: etat.simulation,
     reseau: etat.reseau,
+    travaux: etat.travaux,
     vueCarte: {
       centre: [Number(centre.lng.toFixed(6)), Number(centre.lat.toFixed(6))],
       zoom: Number(carte.getZoom().toFixed(2)),
@@ -215,6 +216,7 @@ function etatPourRapport() {
 document.getElementById('version').textContent = VERSION;
 Rapports.installer(carte, etat, etatPourRapport);
 Recherche.installer(carte, etat, { lon: BORDEAUX[0], lat: BORDEAUX[1] });
+Travaux.installer(carte, etat);
 Itineraire.installer(carte, etat, { lon: BORDEAUX[0], lat: BORDEAUX[1] });
 Navigation.installer({ carte, etat, pointBleu, elementPoint, positionSimulee: nouvellePosition, revenirPositionReelle });
 

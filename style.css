@@ -588,3 +588,63 @@ body.en-navigation #bouton-probleme {
   background-size: contain;
   background-repeat: no-repeat;
 }
+
+/* =====================================================================
+   Travaux (étape 5)
+   ===================================================================== */
+#bouton-bloque, #nav-bloque { z-index: 5; }
+#panneau-signalement { z-index: 22; }
+#message-travaux { z-index: 23; }
+/* Bouton « Rue bloquée » sur la carte : en bas à gauche, au-dessus de « Ça ne va pas » */
+.bouton-bloque {
+  position: absolute;
+  left: calc(16px + env(safe-area-inset-left));
+  bottom: calc(110px + env(safe-area-inset-bottom));
+  height: 52px;
+  padding: 0 16px;
+  background: #b0005a;
+  color: #fff;
+  font-size: 16px;
+}
+body.en-recherche #bouton-bloque,
+body.en-trajet #bouton-bloque,
+body.en-navigation #bouton-bloque { display: none !important; }
+/* Pendant la navigation : à droite, sous « Ça ne va pas » */
+.nav-bloque {
+  left: auto;
+  right: calc(12px + env(safe-area-inset-right));
+  bottom: calc(232px + env(safe-area-inset-bottom));
+  height: 44px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+.message-travaux { top: calc(150px + env(safe-area-inset-top)); }
+
+.panneau-signalement {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px 16px calc(14px + env(safe-area-inset-bottom));
+  background: var(--fond-panneau);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -3px 14px rgba(0, 0, 0, 0.45);
+}
+.panneau-signalement h2 { margin: 0 0 4px; font-size: 22px; }
+.signalement-rue { font-size: 18px; font-weight: 600; }
+.signalement-question { margin-top: 8px; font-size: 16px; color: var(--texte-doux); }
+.signalement-duree { margin-top: 8px; }
+.signalement-duree .bouton { height: 48px; font-size: 16px; }
+.signalement-duree .choisi { background: var(--bleu); }
+
+.alerte-travaux { background: rgba(229, 72, 77, 0.18); color: #ffb0b3; }
+
+/* Fiche d'un chantier (bulle sur la carte) */
+.maplibregl-popup-content { background: var(--fond-panneau); color: var(--texte); border-radius: 12px; padding: 12px 14px; }
+.maplibregl-popup-tip { border-top-color: var(--fond-panneau) !important; border-bottom-color: var(--fond-panneau) !important; }
+.maplibregl-popup-close-button { color: var(--texte); font-size: 22px; padding: 0 6px; }
+.fiche-travaux { font-size: 15px; line-height: 1.35; display: flex; flex-direction: column; gap: 3px; }
+.fiche-travaux strong { font-size: 17px; }
+.fiche-travaux-dates { color: #ffc27a; }
+.fiche-travaux-source { color: var(--texte-doux); font-size: 13px; }
+.fiche-travaux-bouton { margin-top: 8px; height: 44px; font-size: 15px; }

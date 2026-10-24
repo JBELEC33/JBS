@@ -67,6 +67,10 @@
       const point = points[debutMorceau[i]];
       // Borne au bout du morceau précédent
       if (a.borneFin) consignes.push({ type: 'borne', pos, point, titre: 'Borne : badge', rue: '' });
+      // Entrée dans une rue en travaux (voie rétrécie, circulation alternée…)
+      if (b.travaux === 2 && b.chantier && !(a.travaux === 2 && a.chantier === b.chantier)) {
+        consignes.push({ type: 'travaux', pos, point, titre: 'Travaux : ' + b.chantier.texte, rue: b.nom });
+      }
       // Entrée dans une zone piétonne ou à accès réservé
       if ((b.pieton || b.accesLimite) && !(a.pieton || a.accesLimite)) {
         consignes.push({ type: 'pieton', pos, point, titre: b.pieton ? 'Zone piétonne : rouler au pas' : 'Accès réservé : badge', rue: b.nom });
@@ -110,7 +114,7 @@
     consignes.push({ type: 'arrivee', pos: total, point: points[points.length - 1],
       titre: 'Arrivée', rue: nomDestination || '' });
     // Au même endroit : la manœuvre d'abord, puis les informations (zone piétonne, borne)
-    const ordre = { virage: 0, 'rond-point': 0, pieton: 1, borne: 2, arrivee: 3 };
+    const ordre = { virage: 0, 'rond-point': 0, pieton: 1, travaux: 1, borne: 2, arrivee: 3 };
     consignes.sort((x, y) => x.pos - y.pos || ordre[x.type] - ordre[y.type]);
 
     return { points, cumul, cumulTemps, morceauDuSegment, morceaux, consignes, total, totalTemps: cumulTemps[cumulTemps.length - 1] || 0 };

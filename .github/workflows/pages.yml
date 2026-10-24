@@ -1,5 +1,6 @@
 # Mise en ligne automatique sur GitHub Pages.
 # - à chaque modification de la branche main ;
+# - chaque nuit : on récupère les travaux (chantiers de Bordeaux Métropole) ;
 # - chaque lundi matin : on refait aussi les fichiers des lieux (recherche) et des rues (itinéraire),
 #   à partir d'OpenStreetMap.
 # Ces fichiers sont rangés dans la « release » GitHub nommée « donnees »
@@ -10,7 +11,8 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '17 3 * * 1'   # chaque lundi à 3 h 17 (heure de Londres)
+    - cron: '17 3 * * 1'   # chaque lundi à 3 h 17 (heure de Londres) : lieux et rues
+    - cron: '47 4 * * *'   # chaque nuit à 4 h 47 (après la mise à jour de Bordeaux Métropole) : travaux
   workflow_dispatch:
     inputs:
       refaire_donnees:
@@ -42,7 +44,7 @@ jobs:
           change() { [ "${{ github.event_name }}" = "push" ] && git diff --name-only "$avant" "${{ github.sha }}" 2>/dev/null | grep -qE "$1"; }
           present() { gh release view donnees --json assets -q '.assets[].name' 2>/dev/null | grep -qx "$1"; }
           force=non
-          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.refaire_donnees }}" = "true" ]; then force=oui; fi
+          if [ "${{ github.event.schedule }}" = "17 3 * * 1" ] || [ "${{ inputs.refaire_donnees }}" = "true" ]; then force=oui; fi
           lieux=non; rues=non
           if [ $force = oui ] || ! present lieux.json || change '^(scripts/preparer_lieux.py|listes/categories.json)$'; then lieux=oui; fi
           if [ $force = oui ] || ! present rues.bin || change '^(scripts/preparer_rues.py|listes/reglages-itineraire.json)$'; then rues=oui; fi
@@ -69,6 +71,19 @@ jobs:
         if: steps.besoin.outputs.rues != 'oui'
         run: gh release download donnees -p rues.bin -D donnees
 
+      - name: Récupérer les travaux du jour (Bordeaux Métropole)
+        id: travaux
+        run: |
+          if python3 scripts/preparer_travaux.py; then
+            echo "nouveaux=oui" >> "$GITHUB_OUTPUT"
+          else
+            echo "Travaux indisponibles : on reprend ceux de la veille"
+            gh release download donnees -p travaux.json -D donnees || echo '{"date":null,"chantiers":[]}' > donnees/travaux.json
+          fi
+
+      - name: Tester les travaux sur les vraies rues
+        run: node scripts/tester_travaux.js donnees/rues.bin donnees/travaux.json
+
       - name: Tester la recherche avec des exemples réels
         run: node scripts/tester_recherche.js donnees/lieux.json
 
@@ -76,11 +91,11 @@ jobs:
         run: node scripts/tester_itineraire.js donnees/rues.bin
 
       - name: Ranger les nouveaux fichiers dans la release « donnees »
-        if: steps.besoin.outputs.lieux == 'oui' || steps.besoin.outputs.rues == 'oui'
         run: |
           gh release view donnees >/dev/null 2>&1 || gh release create donnees --title "Données de l'appli" --notes "Fichiers préparés automatiquement (lieux et rues OpenStreetMap). Ne pas supprimer." --latest=false
           if [ "${{ steps.besoin.outputs.lieux }}" = "oui" ]; then gh release upload donnees donnees/lieux.json --clobber; fi
           if [ "${{ steps.besoin.outputs.rues }}" = "oui" ]; then gh release upload donnees donnees/rues.bin --clobber; fi
+          if [ "${{ steps.travaux.outputs.nouveaux }}" = "oui" ]; then gh release upload donnees donnees/travaux.json --clobber; fi
 
   publier:
     needs: donnees
@@ -104,9 +119,10 @@ jobs:
       - name: Préparer le site
         run: |
           mkdir -p _site/donnees
-          cp -r index.html style.css app.js rapports.js moteur-recherche.js horaires.js recherche.js moteur-itineraire.js itineraire.js consignes.js navigation.js sw.js manifest.webmanifest icons vendor listes _site/
+          cp -r index.html style.css app.js rapports.js moteur-recherche.js horaires.js recherche.js moteur-itineraire.js itineraire.js consignes.js navigation.js travaux.js sw.js manifest.webmanifest icons vendor listes _site/
           gh release download donnees -p lieux.json -D _site/donnees || echo "Fichier des lieux pas encore disponible"
           gh release download donnees -p rues.bin -D _site/donnees || echo "Fichier des rues pas encore disponible"
+          gh release download donnees -p travaux.json -D _site/donnees || echo "Fichier des travaux pas encore disponible"
           ls -la _site _site/donnees
       - uses: actions/upload-pages-artifact@v3
       - id: deploiement

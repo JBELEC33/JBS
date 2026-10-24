@@ -26,6 +26,7 @@ const Itineraire = (() => {
         .then((tampon) => {
           const debut = Date.now();
           reseau = MoteurItineraire.creerReseau(tampon);
+          Travaux.surReseau(reseau); // les chantiers et rues bloquées sont accrochés aux rues
           etat.reseau = { date: reseau.date, preparationMs: Date.now() - debut, taille: tampon.byteLength };
           return reseau;
         })
@@ -194,7 +195,12 @@ const Itineraire = (() => {
     if (trajet.morceaux.some((m) => m.pieton)) alertes.appendChild(element('li', 'alerte', 'Passe par une zone piétonne : rouler au pas'));
     if (trajet.morceaux.some((m) => m.accesLimite)) alertes.appendChild(element('li', 'alerte', 'Passe par une rue à accès réservé (badge)'));
     if (trajet.bornes.length) alertes.appendChild(element('li', 'alerte', 'Borne' + (trajet.bornes.length > 1 ? 's' : '') + ' à passer avec le badge : ' + trajet.bornes.length));
-    $('trajet-info').textContent = 'Calculé sur le téléphone en ' + trajet.ms + ' ms · rues OpenStreetMap du ' + new Date(reseau.date).toLocaleDateString('fr-FR');
+    // Travaux sur le trajet (rues ralenties ; les rues fermées sont déjà évitées)
+    trajet.chantiers.filter((c) => c.effet === 'ralenti').slice(0, 3).forEach((c) => {
+      alertes.appendChild(element('li', 'alerte alerte-travaux', 'Travaux sur le trajet : ' + c.texte + (c.lieu ? ' (' + c.lieu + ')' : '')));
+    });
+    $('trajet-info').textContent = 'Calculé sur le téléphone en ' + trajet.ms + ' ms · rues OpenStreetMap du ' +
+      new Date(reseau.date).toLocaleDateString('fr-FR') + ' · ' + Travaux.texteMiseAJour();
     $('trajet-boutons').classList.remove('cache');
     dessiner();
     cadrer();
@@ -256,5 +262,10 @@ const Itineraire = (() => {
     $('trajet-fermer').addEventListener('click', fermerApercu);
   }
 
-  return { installer, apercu, charger, recalculer, terminer };
+  // Les travaux ont changé pendant l'aperçu : on refait le calcul
+  function recalculerApercu() {
+    if (destination && etat.ecran === 'apercu') apercu(destination);
+  }
+
+  return { installer, apercu, charger, recalculer, terminer, recalculerApercu };
 })();

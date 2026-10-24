@@ -48,7 +48,7 @@ const Navigation = (() => {
         `<text x="24" y="27" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">${c.sortie}</text>`;
     } else if (c.type === 'arrivee') {
       dessin = `<path d="M14 44 V6" ${trait}/><path d="M14 8 H36 L30 15 L36 22 H14 Z" fill="currentColor"/>`;
-    } else if (c.type === 'pieton' || c.type === 'borne') {
+    } else if (c.type === 'pieton' || c.type === 'borne' || c.type === 'travaux') {
       dessin = `<path d="M24 6 L44 42 H4 Z" ${trait}/><path d="M24 18 V29" ${trait}/><circle cx="24" cy="36" r="2.5" fill="currentColor"/>`;
     } else {
       dessin = `<path d="M24 44 V8" ${trait}/><path d="M14 18 L24 8 L34 18" ${trait}/>`;
@@ -77,6 +77,7 @@ const Navigation = (() => {
     $('nav-haut').classList.remove('cache');
     $('barre-trajet').classList.remove('cache');
     $('nav-vitesse').classList.remove('cache');
+    $('nav-bloque').classList.remove('cache');
     $('barre-simulation').classList.toggle('cache', !simuler);
     document.body.classList.toggle('avec-simulation', !!simuler);
     $('barre-arreter').textContent = 'Arrêter';
@@ -102,7 +103,7 @@ const Navigation = (() => {
     if (nav.verrou) nav.verrou.release().catch(() => {});
     nav = null;
     document.body.classList.remove('en-navigation', 'avec-simulation');
-    ['nav-haut', 'barre-trajet', 'nav-vitesse', 'confirmation-arret', 'panneau-secours'].forEach((id) => $(id).classList.add('cache'));
+    ['nav-haut', 'barre-trajet', 'nav-vitesse', 'confirmation-arret', 'panneau-secours', 'nav-bloque', 'nav-conseil'].forEach((id) => $(id).classList.add('cache'));
     elementPoint.classList.remove('fleche-navigation');
     pointBleu.setRotation(0).setRotationAlignment('auto').setPitchAlignment('auto');
     if (etat.position) pointBleu.setLngLat([etat.position.longitude, etat.position.latitude]);
@@ -406,5 +407,15 @@ const Navigation = (() => {
     $('simulation-plus').addEventListener('click', () => changerVitesse(1));
   }
 
-  return { installer, demarrer, arreter, position, recentrer, actif: () => !!nav };
+  // Recalcul immédiat depuis la position actuelle (par exemple après un signalement « rue bloquée »)
+  function recalculerMaintenant() {
+    if (!nav || nav.arrivee) return;
+    const p = nav.anim ? positionAnimee(performance.now()) : null;
+    const lon = p ? p.p[0] : (etat.position && etat.position.longitude);
+    const lat = p ? p.p[1] : (etat.position && etat.position.latitude);
+    if (lon == null) return;
+    recalculer(lon, lat, nav.capAffiche);
+  }
+
+  return { installer, demarrer, arreter, position, recentrer, recalculerMaintenant, actif: () => !!nav };
 })();
