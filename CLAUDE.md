@@ -106,7 +106,8 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 ## État d'avancement et choix déjà faits
 - **Étape 1 faite** (carte + position + bouton « Ça ne va pas » + mise en ligne). Validée sur l'iPhone.
 - **Étape 2 faite** (recherche). Validée sur l'iPhone.
-- **Étape 3 faite** (fichier des rues + itinéraire calculé sur le téléphone + aperçu + mode simulation) : à valider sur l'iPhone.
+- **Étape 3 faite** (fichier des rues + itinéraire calculé sur le téléphone + aperçu + mode simulation). Validée sur l'iPhone.
+- **Étape 4 faite** (guidage et interface de navigation) : à valider sur l'iPhone, en simulation puis en conditions réelles.
 - Fond de carte en ligne : **OpenFreeMap** (tiles.openfreemap.org, gratuit, sans clé, données OSM), style `dark` si l'iPhone est en mode sombre, `liberty` sinon. Sera complété par la carte hors ligne à l'étape 6.
 - MapLibre GL JS est copié dans `vendor/maplibre/` (pas de CDN).
 - Mise en ligne : workflow `.github/workflows/pages.yml` (GitHub Pages, source « GitHub Actions »), déclenché à chaque push sur `main`, chaque lundi (refait le fichier des lieux) et à la main (`workflow_dispatch`, option « refaire_donnees »).
@@ -138,6 +139,21 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 - `moteur-itineraire.js` : A* sur les arêtes (permet les interdictions de tourner), petites pénalités de virage (droite 5 s, gauche 10 s, serré 18 s, borne 15 s), demi-tour seulement en cul-de-sac ; accroche du départ et de l'arrivée à la rue la plus proche (grille de cases de ~300 m). Calcul mesuré : 5 à 70 ms sur ordinateur pour des trajets de 1 à 25 km.
 - `itineraire.js` : chargement du fichier des rues 4 s après l'ouverture, aperçu (durée, distance, heure d'arrivée, alertes zone piétonne / accès réservé / bornes), trajet dessiné (bleu, pointillés orange en zone piétonne, étiquettes « borne : badge » et « zone piétonne : rouler au pas »), « Démarrer » (suivi du point, barre du bas, arrêt avec confirmation), **mode simulation** (×1 à ×8).
 - Tests : `scripts/tester_itineraire.js` (trajets réels, temps de calcul, détail rue par rue) lancé à chaque mise en ligne.
+
+### Guidage et navigation (étape 4)
+- `consignes.js` (testable dans Node) : transforme le trajet en consignes (virage à droite/gauche, « tenez la », « franchement », rond-point avec numéro de sortie, zone piétonne, borne, arrivée) et situe la position sur le trajet (`situer` : distance parcourue, écart, reste, direction de la route).
+  - Pas de consigne là où la route tourne sans autre choix (`continuations` < 2, calculé par `moteur-itineraire.js`).
+  - Direction mesurée 25 m avant et 25 m après chaque carrefour ; deux virages du même côté à moins de 30 m = une seule consigne.
+  - Seuils : < 25° tout droit, < 55° « Tenez la… », < 135° « Tournez à… », au-delà « Tournez franchement à… ».
+- `navigation.js` : écran de navigation.
+  - Caméra : inclinée à 55°, point dans le tiers bas (marge haute = 40 % de l'écran + barre du bas), carte tournée dans le sens de la route, positions interpolées à chaque image (`requestAnimationFrame` + `jumpTo`) pour un mouvement fluide.
+  - Zoom : 15,3 au-dessus de 80 km/h, 16,2 au-dessus de 50 km/h, 17,8 à moins de 150 m d'une manœuvre, 17,2 sinon.
+  - Toucher la carte met la caméra en pause, un geste arrête le suivi (bouton « Recentrer »), retour automatique après 8 s sans toucher.
+  - Sur la route (écart < 30 m), le point est « collé » à la route. Recalcul automatique après 3 positions hors trajet (précision ≤ 50 m) ou dès 80 m d'écart (précision ≤ 40 m), au plus toutes les 8 s, en tenant compte de la direction de la voiture (`calculer(…, { cap })` évite de proposer un demi-tour au départ).
+  - Écran gardé allumé avec l'API Wake Lock ; si l'iPhone refuse, conseil affiché une fois (Réglages › Luminosité et affichage › Verrouillage automatique).
+  - Bandeau vert en haut (manœuvre, distance, rue, puis la suivante si elle arrive dans les 400 m), barre du bas (arrivée, temps, distance, Waze/Plans, Arrêter avec confirmation), compteur de vitesse + panneau de limitation (`maxspeed`), compteur rouge au-delà de la limitation + 4 km/h.
+  - La simulation est dans `navigation.js` ; à la fin d'une simulation, le point revient à la dernière vraie position GPS.
+- Les tests de `scripts/tester_itineraire.js` affichent aussi les consignes de chaque trajet.
 
 ## Idées pour plus tard (ne pas faire maintenant)
 - **Bouton « Étape » pendant la conduite** : il ouvre une barre de recherche ; tous les commerces correspondants sont affichés le long de l'itinéraire, chacun avec un nouvel itinéraire optionnel (détour proposé, sans perdre la destination finale).
