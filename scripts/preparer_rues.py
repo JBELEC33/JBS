@@ -3,7 +3,8 @@
 # Prépare le fichier des rues (réseau routier) pour le calcul
 # d'itinéraire sur le téléphone. Lancé chaque semaine par GitHub Actions.
 #
-# 1. Télécharge les rues depuis OpenStreetMap (service Overpass) :
+# 1. Télécharge les rues depuis OpenStreetMap : extrait régional Geofabrik
+#    (fiable, prévu pour les téléchargements en gros), sinon service Overpass :
 #    voies, sens uniques, vitesses, zones piétonnes, bornes, barrières,
 #    interdictions de tourner.
 # 2. Applique les règles de l'appli (voir CLAUDE.md, section « Règles ») :
@@ -14,7 +15,8 @@
 # 3. Écrit un fichier binaire compact : donnees/rues.bin
 #    (un en-tête JSON décrivant les tableaux, puis les tableaux de nombres).
 #
-# Utilise uniquement Python standard.
+# Utilise Python standard, plus la bibliothèque « osmium » (pyosmium) pour lire
+# l'extrait Geofabrik ; GitHub Actions l'installe avant de lancer ce script.
 # =====================================================================
 import json
 import math
@@ -30,6 +32,11 @@ from datetime import datetime, timezone
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SORTIE = os.path.join(RACINE, 'donnees', 'rues.bin')
 AGENT = 'GPS-Bordeaux/1.0 (appli personnelle, github.com/JBELEC33/JBS)'
+# Extraits régionaux Geofabrik (le premier qui répond est utilisé)
+EXTRAITS_GEOFABRIK = [
+    'https://download.geofabrik.de/europe/france/aquitaine-latest.osm.pbf',
+    'https://download.geofabrik.de/europe/france/nouvelle-aquitaine-latest.osm.pbf',
+]
 SERVEURS_OVERPASS = [
     'https://overpass-api.de/api/interpreter',
     'https://overpass.private.coffee/api/interpreter',
@@ -40,6 +47,7 @@ SERVEURS_OVERPASS = [
 # Toute la Gironde ferait environ 10 Mo au lieu de 4 Mo (voir CLAUDE.md).
 ZONE_COUVERTE = (44.70, -0.85, 45.05, -0.35)
 ZONE = ''
+MIN_VOIES = 10000  # en dessous, la lecture est jugée incomplète
 FILTRE_ZONE = '(%s,%s,%s,%s)' % ZONE_COUVERTE
 
 TYPES_VOIES = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified',
@@ -70,6 +78,89 @@ def journal(*args):
 
 
 def telecharger_osm():
+    """Renvoie la liste des éléments OSM (points, voies, interdictions) de la zone couverte."""
+    try:
+        return lire_geofabrik()
+    except Exception as e:
+        journal('Extrait Geofabrik indisponible :', e, '— on essaie Overpass')
+        return lire_overpass()
+
+
+def lire_geofabrik():
+    import osmium  # bibliothèque installée par GitHub Actions
+    import tempfile
+    sud, ouest, nord, est = ZONE_COUVERTE
+    dedans = lambda lon, lat: ouest <= lon <= est and sud <= lat <= nord
+    types = set(TYPES_VOIES)
+    dossier = tempfile.mkdtemp()
+    fichier = os.path.join(dossier, 'region.osm.pbf')
+    for url in EXTRAITS_GEOFABRIK:
+        try:
+            journal('Téléchargement de l\'extrait Geofabrik :', url)
+            req = urllib.request.Request(url, headers={'User-Agent': AGENT})
+            with urllib.request.urlopen(req, timeout=900) as r, open(fichier, 'wb') as f:
+                while True:
+                    bloc = r.read(1 << 20)
+                    if not bloc:
+                        break
+                    f.write(bloc)
+            break
+        except Exception as e:
+            journal('  échec :', e)
+    else:
+        raise RuntimeError('aucun extrait téléchargé')
+    journal(f'  {os.path.getsize(fichier) // 1048576} Mo reçus, lecture…')
+
+    class Lecteur(osmium.SimpleHandler):
+        def __init__(self):
+            super().__init__()
+            self.barrieres = {}   # id → étiquettes des points « barrier » de la zone
+            self.points = {}      # id → (lon, lat) des points des voies retenues
+            self.voies = []
+            self.relations = []
+
+        def node(self, n):
+            if 'barrier' in n.tags and n.location.valid() and dedans(n.location.lon, n.location.lat):
+                self.barrieres[n.id] = {t.k: t.v for t in n.tags}
+
+        def way(self, w):
+            if w.tags.get('highway') not in types:
+                return
+            try:
+                pts = [(nd.ref, nd.lon, nd.lat) for nd in w.nodes]
+            except osmium.InvalidLocationError:
+                return
+            if not any(dedans(lon, lat) for (_, lon, lat) in pts):
+                return
+            for (ref, lon, lat) in pts:
+                self.points[ref] = (lon, lat)
+            self.voies.append({'type': 'way', 'id': w.id, 'nodes': [p[0] for p in pts],
+                               'tags': {t.k: t.v for t in w.tags}})
+
+        def relation(self, r):
+            if r.tags.get('type') != 'restriction':
+                return
+            self.relations.append({'type': 'relation', 'id': r.id, 'tags': {t.k: t.v for t in r.tags},
+                                   'members': [{'type': {'n': 'node', 'w': 'way', 'r': 'relation'}[m.type],
+                                                'ref': m.ref, 'role': m.role} for m in r.members]})
+
+    lecteur = Lecteur()
+    lecteur.apply_file(fichier, locations=True, idx='flex_mem')
+    os.remove(fichier)
+    elements = []
+    for ref, (lon, lat) in lecteur.points.items():
+        e = {'type': 'node', 'id': ref, 'lon': lon, 'lat': lat}
+        if ref in lecteur.barrieres:
+            e['tags'] = lecteur.barrieres[ref]
+        elements.append(e)
+    elements += lecteur.voies + lecteur.relations
+    journal(f'  {len(lecteur.points)} points, {len(lecteur.voies)} voies, {len(lecteur.relations)} interdictions lues')
+    if len(lecteur.voies) < MIN_VOIES:
+        raise RuntimeError('trop peu de voies lues')
+    return elements
+
+
+def lire_overpass():
     h = '|'.join(TYPES_VOIES)
     requete = (f'[out:json][timeout:540][maxsize:4000000000];{ZONE}'
                f'way{FILTRE_ZONE}["highway"~"^({h})$"]->.voies;'

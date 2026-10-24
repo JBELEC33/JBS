@@ -60,7 +60,10 @@ jobs:
 
       - name: Préparer le fichier des rues (OpenStreetMap)
         if: steps.besoin.outputs.rues == 'oui'
-        run: python3 scripts/preparer_rues.py
+        run: |
+          # Bibliothèque pour lire l'extrait régional Geofabrik (format .osm.pbf)
+          python3 -m pip install --quiet --user --break-system-packages osmium
+          python3 scripts/preparer_rues.py
 
       - name: Reprendre le fichier des rues existant
         if: steps.besoin.outputs.rues != 'oui'
