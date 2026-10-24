@@ -107,7 +107,8 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 - **Étape 1 faite** (carte + position + bouton « Ça ne va pas » + mise en ligne). Validée sur l'iPhone.
 - **Étape 2 faite** (recherche). Validée sur l'iPhone.
 - **Étape 3 faite** (fichier des rues + itinéraire calculé sur le téléphone + aperçu + mode simulation). Validée sur l'iPhone.
-- **Étape 4 faite** (guidage et interface de navigation) : à valider sur l'iPhone, en simulation puis en conditions réelles.
+- **Étape 4 faite** (guidage et interface de navigation). Validée sur l'iPhone.
+- **Étape 5 faite** (travaux de Bordeaux Métropole + signalement « rue bloquée ») : à valider sur l'iPhone. **Décision de l'utilisatrice : pas de TomTom** (licence incompatible, voir plus bas).
 - Fond de carte en ligne : **OpenFreeMap** (tiles.openfreemap.org, gratuit, sans clé, données OSM), style `dark` si l'iPhone est en mode sombre, `liberty` sinon. Sera complété par la carte hors ligne à l'étape 6.
 - MapLibre GL JS est copié dans `vendor/maplibre/` (pas de CDN).
 - Mise en ligne : workflow `.github/workflows/pages.yml` (GitHub Pages, source « GitHub Actions »), déclenché à chaque push sur `main`, chaque lundi (refait le fichier des lieux) et à la main (`workflow_dispatch`, option « refaire_donnees »).
@@ -155,7 +156,17 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
   - La simulation est dans `navigation.js` ; à la fin d'une simulation, le point revient à la dernière vraie position GPS.
 - Les tests de `scripts/tester_itineraire.js` affichent aussi les consignes de chaque trajet.
 
-### Travaux (étape 5) : recherche faite le 24/10/2026, en attente de la décision de l'utilisatrice
+### Travaux (étape 5)
+- **Décision du 24/10/2026 : on fait sans TomTom.** Ne pas brancher TomTom (ni autre service en ligne de trafic) sans nouvel accord de l'utilisatrice et sans vérifier la licence.
+- `scripts/preparer_travaux.py` (Python standard) : télécharge `ci_chantier`, garde les chantiers non terminés, classe l'effet : **« ferme »** (circulation interdite, mise en impasse, interruption, sens interdit), **« ralenti »** (circulation alternée, rétrécissement, neutralisation de voie, limitation de vitesse, circulation inversée), **« info »** (stationnement…) ; écrit `donnees/travaux.json` (≈ 120 Ko). Lancé chaque nuit (cron `47 4 * * *` dans `pages.yml`) et à chaque mise en ligne ; en cas d'échec, l'ancien fichier (release « donnees ») est repris.
+- `moteur-itineraire.js` → `definirTravaux(liste)` : un chantier ponctuel ferme/ralentit le tronçon le plus proche (≤ 30 m) ; un chantier en ligne touche les tronçons qu'il longe (points tous les 8 m, ≤ 12 m, même direction ±35°). Rue fermée = infranchissable (sauf le tronçon de départ ou d'arrivée) ; ralentie = temps × 1,8 + 20 s. Mesuré : 208 chantiers actifs → 174 tronçons fermés, 239 ralentis, en 0,3 s sur ordinateur (≈ 1 s sur iPhone).
+- `travaux.js` : chargement à l'ouverture (et au retour dans l'appli après 3 h), chantiers actifs du jour seulement, affichage sur la carte dès le zoom 12 (rouge = fermé, orange = ralenti, gris = info, framboise = signalé par l'utilisatrice), fiche au toucher, date de mise à jour (aperçu, panneau de signalement).
+- **Signalement « rue bloquée »** : bouton framboise (carte et navigation), refusé au-dessus de 15 km/h ; un toucher bloque la rue la plus proche de la position ; panneau pour corriger la rue (toucher la carte), choisir la durée (ce soir / 1 semaine / 1 mois) ou annuler ; gardé dans `localStorage` (`gps-bordeaux-signalements`), supprimé automatiquement à la date de fin ou d'un toucher sur sa fiche. Pendant un trajet : recalcul immédiat.
+- Consigne de guidage « Travaux : … » en entrant dans une rue ralentie ; alerte dans l'aperçu.
+- Limite connue : la géométrie d'un chantier qui décrit plusieurs rues n'est souvent qu'un point ou une ligne : l'accroche peut tomber sur une rue voisine.
+- `scripts/tester_travaux.js` : vérifie à chaque mise en ligne qu'aucun trajet ne passe par une rue fermée.
+
+#### Recherche des sources (24/10/2026)
 - **Bordeaux Métropole, jeu `ci_chantier`** (opendata.bordeaux-metropole.fr, API `api/explore/v2.1/catalog/datasets/ci_chantier/exports/json`) : chantiers **de Bordeaux et Mérignac uniquement** modifiant la circulation ; Licence Ouverte ; mis à jour chaque nuit (vers 3 h) ; 295 chantiers ce jour ; géométrie point (202) ou ligne (93) ; dates de début et de fin ; mesures dans `libelle` séparées par « ; », « / » ou « # » : Neutralisation de voie (90), Interdiction de stationnement (74), Circulation interdite (65), Limitation de vitesse (54), Rétrécissement de largeur de voie (43), Circulation alternée (43), Mesure libre circulation (39), Mise en impasse (24), Déviation, Circulation inversée, Interruption de circulation, Sens interdit… Jeux liés : `ci_acte_a`, `ci_emprise_a`, `ci_mesure_a`.
 - **`ci_evenmt_p` « Événement impactant la circulation »** : 3 enregistrements, dernière mise à jour juillet 2026 : inutilisable en l'état.
 - **`ci_borna_p` « Borne d'accès »** (419 bornes, Bordeaux) : utile plus tard pour affiner la règle des bornes.

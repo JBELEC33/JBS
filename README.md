@@ -12,6 +12,8 @@ Petite appli GPS personnelle (application web installable sur iPhone) pour circu
 - `recherche.js`, `moteur-recherche.js`, `horaires.js` : la recherche (adresses, lieux, catégories, sigles).
 - `itineraire.js`, `moteur-itineraire.js` : calcul de l'itinéraire sur le téléphone, aperçu.
 - `consignes.js`, `navigation.js` : consignes de guidage, écran de navigation, recalcul, mode simulation.
+- `travaux.js` : chantiers de Bordeaux Métropole et signalements « rue bloquée ».
+- `scripts/preparer_travaux.py`, `scripts/tester_travaux.js` : fichier des travaux (chaque nuit) et ses tests.
 - `listes/categories.json`, `listes/sigles.json` : listes faciles à compléter (types de lieux, sigles).
 - `listes/reglages-itineraire.json` : zone où le badge ouvre les bornes (Bordeaux centre).
 - `scripts/preparer_rues.py`, `scripts/tester_itineraire.js` : fichier des rues (chaque semaine) et ses tests.
