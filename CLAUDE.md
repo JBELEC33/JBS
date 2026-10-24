@@ -20,7 +20,7 @@
 2. Montrer ma position en temps réel (point bleu qui suit la voiture).
 3. Rechercher une destination (avant de partir, jamais en roulant) : une adresse, un commerce, un type de lieu ou un sigle. Voir la section « Recherche ».
 4. Calculer l'itinéraire en voiture et l'afficher sur la carte, avec la durée et la distance.
-5. Guider pendant le trajet : prochaine instruction affichée en gros à l'écran (« dans 200 m, tournez à droite »). Pas de voix pour l'instant.
+5. Guider pendant le trajet : le trajet est dessiné sur la carte, la caméra suit la voiture. **Pas de bandeau d'instructions avec flèches** (retiré à la demande de l'utilisatrice le 24/10/2026 : trop encombrant, inutile pour elle). Pas de voix.
 6. Tenir compte des travaux en cours : les afficher sur la carte et les éviter dans le calcul d'itinéraire.
 
 C'est tout pour l'instant.
@@ -72,7 +72,7 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 - **Zoom et déplacement libres à tout moment** avec les doigts : la caméra arrête alors de suivre.
 - **Bouton « Recentrer »** bien visible dès que la caméra ne suit plus : un toucher et on revient à la vue de navigation. Revenir automatiquement après quelques secondes sans toucher l'écran.
 - **Zoom automatique selon la vitesse** : vue plus large à vitesse élevée (rocade), plus serrée à l'approche d'une manœuvre en ville.
-- **Bandeau en haut** : prochaine manœuvre avec une grosse flèche et la distance, et la manœuvre suivante en plus petit dessous.
+- ~~Bandeau en haut avec la prochaine manœuvre~~ : **retiré à la demande de l'utilisatrice (24/10/2026), ne pas le remettre.** Seul un petit message apparaît en haut quand c'est utile (« Nouvel itinéraire », « Vous êtes arrivée »).
 - **Barre en bas** : heure d'arrivée, temps restant, distance restante.
 - **Vitesse actuelle** affichée, avec la **limitation de vitesse** de la rue quand elle est connue (OSM `maxspeed`).
 - **Recalcul automatique** si l'utilisatrice sort de l'itinéraire.
@@ -142,7 +142,7 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
 - Tests : `scripts/tester_itineraire.js` (trajets réels, temps de calcul, détail rue par rue) lancé à chaque mise en ligne.
 
 ### Guidage et navigation (étape 4)
-- `consignes.js` (testable dans Node) : transforme le trajet en consignes (virage à droite/gauche, « tenez la », « franchement », rond-point avec numéro de sortie, zone piétonne, borne, arrivée) et situe la position sur le trajet (`situer` : distance parcourue, écart, reste, direction de la route).
+- `consignes.js` (testable dans Node) : garde le suivi de la position sur le trajet ; les consignes servent seulement au zoom à l'approche des carrefours (plus affichées). Transforme le trajet en consignes (virage à droite/gauche, « tenez la », « franchement », rond-point avec numéro de sortie, zone piétonne, borne, arrivée) et situe la position sur le trajet (`situer` : distance parcourue, écart, reste, direction de la route).
   - Pas de consigne là où la route tourne sans autre choix (`continuations` < 2, calculé par `moteur-itineraire.js`).
   - Direction mesurée 25 m avant et 25 m après chaque carrefour ; deux virages du même côté à moins de 30 m = une seule consigne.
   - Seuils : < 25° tout droit, < 55° « Tenez la… », < 135° « Tournez à… », au-delà « Tournez franchement à… ».
@@ -152,7 +152,7 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
   - Toucher la carte met la caméra en pause, un geste arrête le suivi (bouton « Recentrer »), retour automatique après 8 s sans toucher.
   - Sur la route (écart < 30 m), le point est « collé » à la route. Recalcul automatique après 3 positions hors trajet (précision ≤ 50 m) ou dès 80 m d'écart (précision ≤ 40 m), au plus toutes les 8 s, en tenant compte de la direction de la voiture (`calculer(…, { cap })` évite de proposer un demi-tour au départ).
   - Écran gardé allumé avec l'API Wake Lock ; si l'iPhone refuse, conseil affiché une fois (Réglages › Luminosité et affichage › Verrouillage automatique).
-  - Bandeau vert en haut (manœuvre, distance, rue, puis la suivante si elle arrive dans les 400 m), barre du bas (arrivée, temps, distance, Waze/Plans, Arrêter avec confirmation), compteur de vitesse + panneau de limitation (`maxspeed`), compteur rouge au-delà de la limitation + 4 km/h.
+  - ~~Bandeau vert en haut~~ (retiré le 24/10/2026, version 5.1) ; petit message `#nav-message` ; barre du bas (arrivée, temps, distance, Waze/Plans, Arrêter avec confirmation), compteur de vitesse + panneau de limitation (`maxspeed`), compteur rouge au-delà de la limitation + 4 km/h.
   - La simulation est dans `navigation.js` ; à la fin d'une simulation, le point revient à la dernière vraie position GPS.
 - Les tests de `scripts/tester_itineraire.js` affichent aussi les consignes de chaque trajet.
 

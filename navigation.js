@@ -1,7 +1,6 @@
 // =====================================================================
 // Navigation pendant le trajet (comme les GPS grand public) :
 // - caméra inclinée en 3D qui suit la voiture et tourne dans le sens de la marche ;
-// - bandeau en haut : prochaine manœuvre (grosse flèche, distance), puis la suivante ;
 // - barre en bas : heure d'arrivée, temps et distance restants ;
 // - vitesse actuelle et limitation de la rue ;
 // - recalcul automatique si l'on sort du trajet ;
@@ -34,26 +33,13 @@ const Navigation = (() => {
     return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
   }
 
-  // Grosse flèche dessinée selon la manœuvre
-  function icone(c) {
-    const trait = 'fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"';
-    let dessin;
-    if (c.type === 'virage') {
-      if (c.force === 'legerement') dessin = `<path d="M18 44 V28 L34 12" ${trait}/><path d="M23 11 H35 V23" ${trait}/>`;
-      else if (c.force === 'serre') dessin = `<path d="M16 44 V16 Q16 8 24 8 Q32 8 32 16 V34" ${trait}/><path d="M24 27 L32 35 L40 27" ${trait}/>`;
-      else dessin = `<path d="M16 44 V26 Q16 18 24 18 H38" ${trait}/><path d="M31 11 L38 18 L31 25" ${trait}/>`;
-      if (c.cote === 'gauche') dessin = `<g transform="translate(48,0) scale(-1,1)">${dessin}</g>`;
-    } else if (c.type === 'rond-point') {
-      dessin = `<circle cx="24" cy="22" r="9" ${trait}/><path d="M24 46 V31" ${trait}/>` +
-        `<text x="24" y="27" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">${c.sortie}</text>`;
-    } else if (c.type === 'arrivee') {
-      dessin = `<path d="M14 44 V6" ${trait}/><path d="M14 8 H36 L30 15 L36 22 H14 Z" fill="currentColor"/>`;
-    } else if (c.type === 'pieton' || c.type === 'borne' || c.type === 'travaux') {
-      dessin = `<path d="M24 6 L44 42 H4 Z" ${trait}/><path d="M24 18 V29" ${trait}/><circle cx="24" cy="36" r="2.5" fill="currentColor"/>`;
-    } else {
-      dessin = `<path d="M24 44 V8" ${trait}/><path d="M14 18 L24 8 L34 18" ${trait}/>`;
-    }
-    return `<svg viewBox="0 0 48 48" width="100%" height="100%" aria-hidden="true">${dessin}</svg>`;
+  // Petit message en haut de l'écran (recalcul, arrivée). duree = 0 : reste affiché
+  function message(texte, duree) {
+    const m = $('nav-message');
+    m.textContent = texte;
+    m.classList.remove('cache');
+    clearTimeout(message.minuterie);
+    if (duree) message.minuterie = setTimeout(() => m.classList.add('cache'), duree);
   }
 
   // -------------------------------------------------------------------
@@ -74,7 +60,6 @@ const Navigation = (() => {
     etat.trajet.mode = simuler ? 'simulation' : 'en route';
     etat.trajet.recalculs = 0;
     document.body.classList.add('en-navigation');
-    $('nav-haut').classList.remove('cache');
     $('barre-trajet').classList.remove('cache');
     $('nav-vitesse').classList.remove('cache');
     $('nav-bloque').classList.remove('cache');
@@ -103,7 +88,7 @@ const Navigation = (() => {
     if (nav.verrou) nav.verrou.release().catch(() => {});
     nav = null;
     document.body.classList.remove('en-navigation', 'avec-simulation');
-    ['nav-haut', 'barre-trajet', 'nav-vitesse', 'confirmation-arret', 'panneau-secours', 'nav-bloque', 'nav-conseil'].forEach((id) => $(id).classList.add('cache'));
+    ['nav-message', 'barre-trajet', 'nav-vitesse', 'confirmation-arret', 'panneau-secours', 'nav-bloque', 'nav-conseil'].forEach((id) => $(id).classList.add('cache'));
     elementPoint.classList.remove('fleche-navigation');
     pointBleu.setRotation(0).setRotationAlignment('auto').setPitchAlignment('auto');
     if (etat.position) pointBleu.setLngLat([etat.position.longitude, etat.position.latitude]);
@@ -172,15 +157,13 @@ const Navigation = (() => {
   }
 
   function recalculer(lon, lat, cap) {
-    $('nav-titre').textContent = 'Recalcul de l\'itinéraire…';
-    $('nav-rue').textContent = '';
-    $('nav-distance').textContent = '';
     nav.dernierRecalcul = performance.now();
     const nouveau = Itineraire.recalculer({ lon, lat }, cap);
     if (!nouveau || nouveau.erreur) {
-      $('nav-titre').textContent = nouveau && nouveau.message ? nouveau.message : 'Recalcul impossible';
+      message(nouveau && nouveau.message ? nouveau.message : 'Recalcul impossible', 6000);
       return;
     }
+    message('Nouvel itinéraire', 3000);
     nav.trajet = nouveau;
     nav.prep = Consignes.preparer(nouveau, nav.destination.nom);
     nav.indice = 0;
@@ -191,7 +174,7 @@ const Navigation = (() => {
   }
 
   // -------------------------------------------------------------------
-  // Affichage : bandeau, barre du bas, vitesse
+  // Affichage : barre du bas, vitesse
   // -------------------------------------------------------------------
   function afficher(s, kmh) {
     const prep = nav.prep;
@@ -200,31 +183,13 @@ const Navigation = (() => {
     const resteTemps = s ? s.resteTemps : prep.totalTemps;
 
     if (nav.arrivee) {
-      $('nav-icone').innerHTML = icone({ type: 'arrivee' });
-      $('nav-distance').textContent = '';
-      $('nav-titre').textContent = 'Vous êtes arrivée';
-      $('nav-rue').textContent = nav.destination.nom;
-      $('nav-suivante').classList.add('cache');
+      if ($('barre-arreter').textContent !== 'Terminer') message('Vous êtes arrivée : ' + nav.destination.nom, 0);
       $('barre-arreter').textContent = 'Terminer';
       $('nav-arrivee').textContent = heure(0);
       $('nav-reste-temps').textContent = '0 min';
       $('nav-reste-distance').textContent = '0 m';
       arreterSimulation();
     } else {
-      const [c1, c2] = Consignes.prochaines(prep, parcouru);
-      const d1 = c1.pos - parcouru;
-      $('nav-icone').innerHTML = icone(c1);
-      $('nav-distance').textContent = texteDistance(d1);
-      $('nav-titre').textContent = c1.titre;
-      $('nav-rue').textContent = c1.rue || '';
-      // La manœuvre suivante, si elle arrive peu après
-      if (c2 && c2.pos - c1.pos < 400) {
-        $('nav-suivante').classList.remove('cache');
-        $('nav-suivante-icone').innerHTML = icone(c2);
-        $('nav-suivante-texte').textContent = c2.titre;
-      } else {
-        $('nav-suivante').classList.add('cache');
-      }
       $('nav-arrivee').textContent = heure(resteTemps);
       $('nav-reste-temps').textContent = texteDuree(resteTemps);
       $('nav-reste-distance').textContent = texteDistance(resteDistance);
