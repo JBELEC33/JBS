@@ -23,9 +23,8 @@ jobs:
       url: ${{ steps.deploiement.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # GitHub Pages doit avoir été activé une fois : Settings › Pages › Source : « GitHub Actions »
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       # On publie uniquement les fichiers de l'appli
       - name: Préparer le site
         run: |
