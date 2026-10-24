@@ -233,7 +233,12 @@ const Navigation = (() => {
 
   function marges() {
     // Le point de position est placé dans le tiers bas de l'écran
-    const bas = $('barre-trajet').getBoundingClientRect().height + 10;
+    const r = $('barre-trajet').getBoundingClientRect();
+    if (r.width < window.innerWidth * 0.7) {
+      // Téléphone en paysage : la barre est une colonne à gauche, la route se voit à sa droite
+      return { top: Math.round(window.innerHeight * 0.4), bottom: 10, left: Math.round(r.right), right: 0 };
+    }
+    const bas = r.height + 10;
     return { top: Math.round(window.innerHeight * 0.4) + bas, bottom: bas, left: 0, right: 0 };
   }
 

@@ -240,6 +240,9 @@ const Recherche = (() => {
   // (On calcule d'après la position finale du panneau, pas pendant qu'il glisse.)
   function margesCarte() {
     const hauteur = window.innerHeight;
+    // Téléphone en paysage : la liste est sur le côté gauche, les repères sont cadrés à sa droite
+    const r = $('recherche-panneau').getBoundingClientRect();
+    if (r.width && r.width < window.innerWidth * 0.7) return { top: 40, bottom: 40, left: Math.round(r.right) + 40, right: 40 };
     const haut = $('recherche-haut').getBoundingClientRect().bottom + 30;
     const partPanneau = $('recherche-panneau').classList.contains('avec-fiche') ? 0.62 : 0.48;
     const bas = Math.round(hauteur * partPanneau) + 30;

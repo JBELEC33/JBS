@@ -157,6 +157,16 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
   - La simulation est dans `navigation.js` ; à la fin d'une simulation, le point revient à la dernière vraie position GPS.
 - Les tests de `scripts/tester_itineraire.js` affichent aussi les consignes de chaque trajet.
 
+### Mode paysage (ajout du 24/10/2026, version 5.7)
+- Demande de l'utilisatrice : « le mode portrait est globalement ok mais le mode paysage n'est pas du tout au point ».
+- Règles CSS `@media (orientation: landscape) and (max-height: 540px)` à la fin de `style.css` : les panneaux passent **à gauche, sur toute la hauteur**, la carte reste visible à droite :
+  - recherche : en-tête et liste à gauche (largeur `--cote`, ≤ 380 px), repères cadrés à droite ;
+  - aperçu du trajet : panneau à gauche, trajet cadré à droite ;
+  - navigation : la barre du bas devient une colonne à gauche (`--cote-nav`, ≤ 290 px) : arrivée / restant / distance sur une ligne chacun (étiquette à gauche, chiffre à droite), puis « Waze / Plans » et « Arrêter », puis − ×2 + ; compteur de vitesse en bas à gauche de la carte, « Recentrer », « Ça ne va pas » et « Rue bloquée » à droite ; messages en haut de la carte ;
+  - fenêtres du bas (« Ça ne va pas », confirmations) moins larges ; « Rue bloquée » et « Aller ici ? » à gauche pour laisser la carte touchable.
+- Cadrage de la carte : `itineraire.js` (`cadrer`), `recherche.js` (`margesCarte`) et `navigation.js` (`marges`) détectent un panneau latéral (moins de 70 % de la largeur de l'écran) et décalent la carte vers la droite. Recadrage de l'aperçu quand on tourne le téléphone.
+- Tests : captures Playwright en « iPhone 13 landscape », « iPhone SE landscape », « iPhone 15 Pro Max landscape », sans chevauchement.
+
 ### Appui long sur la carte (ajout du 24/10/2026, version 5.2)
 - `appui-long.js` : garder le doigt ~0,6 s sur la carte (écran carte ou aperçu, jamais pendant la navigation) pose un repère, affiche la rue la plus proche (trouvée dans le fichier des rues, sur le téléphone, sans envoi sur internet) et la distance, avec « Y aller » (ouvre l'aperçu du trajet) ou « Annuler ». Le geste est annulé si le doigt bouge de plus de 10 px ou si deux doigts touchent l'écran.
 

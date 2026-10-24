@@ -137,11 +137,19 @@ const Itineraire = (() => {
     const zone = new maplibregl.LngLatBounds();
     trajet.morceaux.forEach((m) => m.coords.forEach((c) => zone.extend(c)));
     const panneau = $('panneau-trajet');
-    const bas = (panneau.classList.contains('cache') ? 100 : panneau.getBoundingClientRect().height) + 30;
+    const r = panneau.getBoundingClientRect();
+    let marges;
+    if (!panneau.classList.contains('cache') && r.width < window.innerWidth * 0.7) {
+      // Téléphone en paysage : panneau sur le côté gauche, le trajet est cadré à sa droite
+      marges = { top: 30, bottom: 30, left: Math.round(r.right) + 30, right: 30 };
+    } else {
+      const bas = (panneau.classList.contains('cache') ? 100 : r.height) + 30;
+      marges = { top: 90, bottom: bas, left: 40, right: 40 };
+    }
     // On arrête le mouvement en cours (fermeture de la recherche) pour que le cadrage parte d'une carte immobile
     carte.stop();
     carte.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
-    carte.fitBounds(zone, { padding: { top: 90, bottom: bas, left: 40, right: 40 }, maxZoom: 17, duration: 700 });
+    carte.fitBounds(zone, { padding: marges, maxZoom: 17, duration: 700 });
   }
 
   // -------------------------------------------------------------------
@@ -260,6 +268,11 @@ const Itineraire = (() => {
     setTimeout(() => charger().catch(() => {}), 4000);
     // Après un changement de fond de carte (jour/nuit), on redessine le trajet
     carte.on('style.load', dessiner);
+    // Téléphone tourné (portrait ↔ paysage) pendant l'aperçu : on recadre le trajet
+    window.addEventListener('resize', () => {
+      clearTimeout(installer.recadrage);
+      installer.recadrage = setTimeout(() => { if (etat.ecran === 'apercu') cadrer(); }, 300);
+    });
 
     $('trajet-demarrer').addEventListener('click', () => demarrer(false));
     $('trajet-simuler').addEventListener('click', () => demarrer(true));

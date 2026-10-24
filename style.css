@@ -620,3 +620,97 @@ body.en-navigation #bouton-bloque { display: none !important; }
 /* Appui long : pas de menu « copier » d'iOS sur la carte */
 #carte { -webkit-touch-callout: none; }
 #panneau-point { z-index: 24; }
+
+/* =====================================================================
+   Mode paysage (téléphone couché : écran bas et large)
+   Les panneaux passent sur le côté gauche, sur toute la hauteur,
+   et la carte reste visible à droite (comme les GPS du commerce).
+   ===================================================================== */
+@media (orientation: landscape) and (max-height: 540px) {
+  :root {
+    --cote: calc(min(380px, 46vw) + env(safe-area-inset-left));   /* aperçu, recherche */
+    --cote-nav: calc(min(290px, 38vw) + env(safe-area-inset-left)); /* barre de navigation */
+  }
+
+  /* Carte seule : barre « Où allez-vous ? » moins large */
+  .barre-recherche { right: auto; width: calc(min(420px, 50vw)); height: 52px; }
+  .etat { top: calc(72px + env(safe-area-inset-top)); left: calc(12px + env(safe-area-inset-left)); right: auto; width: min(420px, 50vw); box-sizing: border-box; }
+
+  /* Recherche : en-tête et liste à gauche, carte à droite */
+  .recherche-haut { right: auto; width: var(--cote); box-sizing: border-box; padding-left: calc(10px + env(safe-area-inset-left)); }
+  .recherche-panneau,
+  .recherche-panneau.plein,
+  .recherche-panneau.moitie,
+  .recherche-panneau.moitie.avec-fiche {
+    top: calc(70px + env(safe-area-inset-top));
+    right: auto;
+    width: var(--cote);
+    border-radius: 0 0 18px 0;
+    padding-left: env(safe-area-inset-left);
+    box-sizing: border-box;
+  }
+  .recherche-panneau .poignee { display: none; }
+  #recherche-avertissement { left: calc(var(--cote) + 12px); right: 12px; width: auto; top: calc(12px + env(safe-area-inset-top)); }
+
+  /* Aperçu du trajet : panneau à gauche, sur toute la hauteur */
+  .panneau-trajet {
+    top: 0;
+    right: auto;
+    width: var(--cote);
+    max-height: none;
+    padding-left: calc(16px + env(safe-area-inset-left));
+    padding-top: calc(14px + env(safe-area-inset-top));
+    border-radius: 0 18px 18px 0;
+  }
+  .trajet-resume { font-size: 24px; }
+  body.en-trajet .etat { left: calc(var(--cote) + 12px); right: 12px; width: auto; }
+  body.en-trajet #bouton-probleme,
+  body.en-trajet #bouton-recentrer { bottom: calc(12px + env(safe-area-inset-bottom)); }
+
+  /* Navigation : la barre devient une colonne à gauche */
+  .barre-trajet {
+    top: 0;
+    right: auto;
+    width: var(--cote-nav);
+    box-sizing: border-box;
+    gap: 10px;
+    padding: calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+  }
+  /* Arrivée, temps, distance : une ligne chacun, l'étiquette à gauche, le chiffre à droite */
+  .barre-infos { flex: none; flex-direction: column; gap: 4px; }
+  .barre-infos > div { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .barre-infos .barre-petit { order: -1; font-size: 14px; white-space: normal; text-align: left; line-height: 1.15; min-width: 0; }
+  .barre-grand { font-size: 24px; }
+  /* Les deux boutons côte à côte, puis la simulation */
+  .barre-trajet > .bouton-secours, .barre-trajet > .bouton-arreter { flex: none; height: 48px; }
+  .barre-trajet { display: grid; grid-template-columns: 1fr 1fr; align-content: center; }
+  .barre-trajet.cache { display: none; }
+  .barre-infos, .barre-simulation { grid-column: 1 / -1; }
+  .barre-simulation { padding-top: 6px; justify-content: center; }
+  .barre-simulation .barre-note { display: none; } /* place comptée : les boutons − ×2 + suffisent */
+
+  body.en-navigation .nav-vitesse { left: calc(var(--cote-nav) + 12px); bottom: calc(12px + env(safe-area-inset-bottom)); }
+  body.en-navigation #bouton-recentrer { bottom: calc(12px + env(safe-area-inset-bottom)); }
+  body.en-navigation #bouton-probleme { bottom: calc(92px + env(safe-area-inset-bottom)); }
+  .nav-bloque { bottom: calc(148px + env(safe-area-inset-bottom)); }
+  #nav-message, #nav-conseil, .message-travaux {
+    left: calc(var(--cote-nav) + 12px);
+    right: calc(12px + env(safe-area-inset-right));
+    width: auto;
+  }
+  #nav-message { top: calc(10px + env(safe-area-inset-top)); }
+  #nav-conseil { top: calc(10px + env(safe-area-inset-top)); font-size: 15px; padding: 10px 12px; }
+  .message-travaux { top: calc(60px + env(safe-area-inset-top)); }
+
+  /* Fenêtres du bas (« Ça ne va pas », confirmations, rue bloquée, appui long) : plus étroites */
+  .panneau { justify-content: center; }
+  .panneau-contenu { width: min(560px, 100%); max-height: 100%; border-radius: 20px 20px 0 0; }
+  .panneau-signalement {
+    right: auto;
+    left: env(safe-area-inset-left);
+    width: min(440px, 60vw);
+    max-height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+}
