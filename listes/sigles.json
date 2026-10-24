@@ -21,7 +21,7 @@
     { "mots": ["SNCF", "Gare"], "trouve": ["sncf", "gare de", "gare saint jean"], "categories": ["railway=station"] },
     { "mots": ["Gare Saint-Jean", "Saint-Jean"], "trouve": ["gare saint jean", "bordeaux saint jean"] },
     { "mots": ["TBM", "Tram", "Bus"], "trouve": ["tbm", "keolis bordeaux"] },
-    { "mots": ["Aéroport", "Mérignac aéroport"], "trouve": ["aeroport de bordeaux", "bordeaux merignac"], "categories": ["aeroway=aerodrome"] },
+    { "mots": ["Aéroport"], "trouve": ["aeroport de bordeaux", "bordeaux merignac"], "categories": ["aeroway=aerodrome"] },
     { "mots": ["Gendarmerie", "Commissariat", "Police"], "trouve": ["gendarmerie", "commissariat", "police nationale", "police municipale"], "categories": ["amenity=police"] },
     { "mots": ["Tribunal", "Palais de justice"], "trouve": ["tribunal", "palais de justice", "cour d appel"], "categories": ["amenity=courthouse"] },
     { "mots": ["Déchetterie", "Déchèterie", "Centre de recyclage"], "trouve": ["dechetterie", "decheterie", "centre de recyclage"] },
