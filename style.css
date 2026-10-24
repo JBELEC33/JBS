@@ -163,3 +163,220 @@ html, body {
 /* Crédits de la carte : discrets, au-dessus des boutons */
 .maplibregl-ctrl-bottom-right { bottom: calc(118px + env(safe-area-inset-bottom)); }
 .maplibregl-ctrl-bottom-left { display: none; }
+
+/* =====================================================================
+   Recherche
+   ===================================================================== */
+#ouvrir-recherche, #bouton-recentrer, #bouton-probleme { z-index: 5; }
+#ecran-recherche { z-index: 10; }
+#panneau-rapport { z-index: 30; }
+#etat-gps { z-index: 6; }
+/* Pendant la recherche, les boutons de la carte s'effacent (« Ça ne va pas » est dans le panneau) */
+body.en-recherche #bouton-recentrer,
+body.en-recherche #bouton-probleme,
+body.en-recherche #etat-gps { display: none !important; }
+
+/* Barre « Où allez-vous ? » en haut de la carte */
+.barre-recherche {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  left: calc(12px + env(safe-area-inset-left));
+  right: calc(12px + env(safe-area-inset-right));
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 29px;
+  background: var(--fond-panneau);
+  color: var(--texte-doux);
+  font-size: 19px;
+  text-align: left;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* Le message GPS passe sous la barre de recherche */
+.etat { top: calc(80px + env(safe-area-inset-top)); }
+
+#ecran-recherche {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* la carte reste manipulable au milieu */
+}
+#ecran-recherche > * { pointer-events: auto; }
+
+.recherche-haut {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: calc(10px + env(safe-area-inset-top)) 10px 10px;
+  background: var(--fond-panneau);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+.recherche-haut input {
+  flex: 1;
+  min-width: 0;
+  height: 50px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 12px;
+  background: #0f1a30;
+  color: var(--texte);
+  font-family: inherit;
+  font-size: 19px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.recherche-haut input::-webkit-search-cancel-button { display: none; }
+.bouton-icone {
+  width: 50px;
+  height: 50px;
+  flex: none;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--texte);
+  font-size: 32px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#recherche-avertissement { top: calc(84px + env(safe-area-inset-top)); }
+
+/* Panneau du bas : liste ou fiche */
+.recherche-panneau {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--fond-panneau);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -3px 14px rgba(0, 0, 0, 0.45);
+  padding-bottom: env(safe-area-inset-bottom);
+  transition: top 0.25s ease;
+}
+.recherche-panneau.plein { top: calc(70px + env(safe-area-inset-top)); border-radius: 0; }
+.recherche-panneau.moitie { top: 52%; }
+.poignee { padding: 8px 0 4px; display: flex; justify-content: center; flex: none; }
+.poignee span { width: 44px; height: 5px; border-radius: 3px; background: #4a5e86; }
+.recherche-panneau.plein .poignee { display: none; }
+.recherche-titre { padding: 6px 16px; color: var(--texte-doux); font-size: 15px; flex: none; }
+.recherche-titre:empty { display: none; }
+
+#recherche-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+.resultat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #26385a;
+}
+.resultat:active { background: #24365a; }
+.pastille {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--rouge);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pastille-recent { background: #33466b; color: var(--texte-doux); }
+.resultat-texte { flex: 1; min-width: 0; }
+.resultat-nom { font-size: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.resultat-details { font-size: 14px; color: var(--texte-doux); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.resultat-horaires { font-size: 14px; margin-top: 2px; }
+.ouvert { color: #4cc38a; }
+.ferme { color: #ff8a8f; }
+.resultat-distance { flex: none; font-size: 15px; color: var(--texte-doux); }
+.resultat-oublier {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--texte-doux);
+  font-size: 26px;
+}
+
+/* Fiche du lieu choisi */
+.fiche { padding: 4px 16px 12px; overflow-y: auto; flex: 1; }
+.fiche h2 { margin: 0 0 4px; font-size: 24px; }
+.fiche-type { color: var(--texte-doux); font-size: 16px; }
+.fiche-adresse { font-size: 16px; margin-top: 6px; }
+.fiche-horaires { font-size: 16px; margin-top: 6px; }
+.fiche-horaires:empty, .fiche-adresse:empty { display: none; }
+.fiche-distance { color: var(--texte-doux); font-size: 15px; margin-top: 6px; }
+.bouton-large { display: block; width: 100%; height: 60px; margin-top: 14px; font-size: 20px; }
+.bouton-lien {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+#fiche-choix-gps .aide { margin-top: 14px; }
+
+.recherche-pied {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-top: 1px solid #26385a;
+}
+.recherche-info { flex: 1; font-size: 12px; color: var(--texte-doux); }
+.lien-probleme {
+  flex: none;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: var(--orange);
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Repères des résultats sur la carte */
+.repere {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--rouge);
+  border: 2px solid #fff;
+  box-sizing: border-box;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.repere-choisi {
+  width: 42px;
+  height: 42px;
+  background: var(--bleu);
+  font-size: 16px;
+  z-index: 2;
+}

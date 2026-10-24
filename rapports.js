@@ -9,6 +9,7 @@
 const Rapports = (() => {
   const CLE = 'gps-bordeaux-rapports';
   let rapportEnCours = null;
+  let ecranPrecedent = 'carte';
 
   function lire() {
     try { return JSON.parse(localStorage.getItem(CLE)) || []; }
@@ -99,19 +100,25 @@ const Rapports = (() => {
 
     function fermer() {
       panneau.classList.add('cache');
-      etat.ecran = 'carte';
+      etat.ecran = ecranPrecedent;
       rapportEnCours = null;
     }
 
     document.getElementById('bouton-probleme').addEventListener('click', async () => {
       // On note l'état AVANT d'ouvrir la fenêtre, pour avoir l'écran tel qu'il était
       rapportEnCours = { heure: new Date().toISOString(), etat: etatPourRapport() };
+      ecranPrecedent = etat.ecran;
       etat.ecran = 'rapport';
       commentaire.value = '';
       afficherListe();
       panneau.classList.remove('cache');
       const image = await photographierCarte(carte);
       if (rapportEnCours && image) rapportEnCours.image = image;
+    });
+
+    // Le même bouton existe en petit dans l'écran de recherche
+    document.getElementById('recherche-probleme').addEventListener('click', () => {
+      document.getElementById('bouton-probleme').click();
     });
 
     document.getElementById('rapport-annuler').addEventListener('click', fermer);

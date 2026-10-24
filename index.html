@@ -26,6 +26,54 @@
   <!-- Message d'état du GPS (recherche du signal, autorisation refusée…) -->
   <div id="etat-gps" class="etat cache"></div>
 
+  <!-- Barre de recherche, en haut de la carte -->
+  <button id="ouvrir-recherche" class="barre-recherche">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5 L21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    <span>Où allez-vous ?</span>
+  </button>
+
+  <!-- Écran de recherche (la carte reste visible au milieu pour montrer les résultats) -->
+  <div id="ecran-recherche" class="cache">
+    <div id="recherche-haut" class="recherche-haut">
+      <button id="recherche-retour" class="bouton-icone" aria-label="Retour">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M15 4 L7 12 L15 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <input id="recherche-texte" type="search" placeholder="Adresse, commerce, sigle…"
+             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+      <button id="recherche-effacer" class="bouton-icone cache" aria-label="Effacer">×</button>
+    </div>
+    <div id="recherche-avertissement" class="etat cache">Pour votre sécurité, le clavier est bloqué quand la voiture roule. Les recherches récentes restent disponibles.</div>
+
+    <div id="recherche-panneau" class="recherche-panneau plein">
+      <div id="recherche-poignee" class="poignee"><span></span></div>
+      <div id="recherche-titre" class="recherche-titre"></div>
+      <ul id="recherche-liste"></ul>
+
+      <!-- Fiche du lieu choisi -->
+      <div id="recherche-fiche" class="fiche cache">
+        <h2 id="fiche-nom"></h2>
+        <div id="fiche-type" class="fiche-type"></div>
+        <div id="fiche-adresse" class="fiche-adresse"></div>
+        <div id="fiche-horaires" class="fiche-horaires"></div>
+        <div id="fiche-distance" class="fiche-distance"></div>
+        <button id="fiche-y-aller" class="bouton bouton-principal bouton-large">Y aller</button>
+        <div id="fiche-choix-gps" class="cache">
+          <p class="aide">Le calcul de l'itinéraire dans l'appli arrive à la prochaine étape. En attendant, ouvrir la destination dans :</p>
+          <div class="ligne-boutons">
+            <a id="fiche-waze" class="bouton bouton-secondaire bouton-lien" target="_blank" rel="noopener">Waze</a>
+            <a id="fiche-plans" class="bouton bouton-secondaire bouton-lien" target="_blank" rel="noopener">Plans</a>
+          </div>
+        </div>
+        <button id="fiche-retour" class="bouton bouton-secondaire bouton-large">Retour aux résultats</button>
+      </div>
+
+      <div class="recherche-pied">
+        <span id="recherche-info" class="recherche-info"></span>
+        <button id="recherche-probleme" class="lien-probleme">Ça ne va pas</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Gros boutons, faciles à toucher -->
   <button id="bouton-recentrer" class="bouton bouton-rond cache" aria-label="Recentrer sur ma position">
     <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
@@ -59,6 +107,9 @@
   </div>
 
   <script src="vendor/maplibre/maplibre-gl.js"></script>
+  <script src="moteur-recherche.js"></script>
+  <script src="horaires.js"></script>
+  <script src="recherche.js"></script>
   <script src="rapports.js"></script>
   <script src="app.js"></script>
 </body>

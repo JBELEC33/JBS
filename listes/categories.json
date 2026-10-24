@@ -1,0 +1,1780 @@
+{
+ "shop=bakery": {
+  "nom": "Boulangerie",
+  "mots": [
+   "boulanger",
+   "pain",
+   "viennoiserie"
+  ],
+  "sansNom": true
+ },
+ "shop=pastry": {
+  "nom": "Pâtisserie",
+  "mots": [
+   "patissier",
+   "gateau"
+  ],
+  "sansNom": true
+ },
+ "shop=butcher": {
+  "nom": "Boucherie",
+  "mots": [
+   "boucher",
+   "viande"
+  ],
+  "sansNom": true
+ },
+ "shop=cheese": {
+  "nom": "Fromagerie",
+  "mots": [
+   "fromage"
+  ]
+ },
+ "shop=seafood": {
+  "nom": "Poissonnerie",
+  "mots": [
+   "poisson",
+   "poissonnier"
+  ]
+ },
+ "shop=greengrocer": {
+  "nom": "Primeur",
+  "mots": [
+   "fruits",
+   "legumes"
+  ]
+ },
+ "shop=deli": {
+  "nom": "Épicerie fine",
+  "mots": [
+   "traiteur"
+  ]
+ },
+ "shop=confectionery": {
+  "nom": "Confiserie",
+  "mots": [
+   "bonbons"
+  ]
+ },
+ "shop=chocolate": {
+  "nom": "Chocolatier",
+  "mots": [
+   "chocolat"
+  ]
+ },
+ "shop=wine": {
+  "nom": "Caviste",
+  "mots": [
+   "vin",
+   "cave"
+  ]
+ },
+ "shop=alcohol": {
+  "nom": "Caviste",
+  "mots": [
+   "alcool",
+   "vin"
+  ]
+ },
+ "shop=beverages": {
+  "nom": "Boissons"
+ },
+ "shop=coffee": {
+  "nom": "Café (boutique)",
+  "mots": [
+   "cafe"
+  ]
+ },
+ "shop=tea": {
+  "nom": "Thé (boutique)",
+  "mots": [
+   "the"
+  ]
+ },
+ "shop=supermarket": {
+  "nom": "Supermarché",
+  "mots": [
+   "supermarche",
+   "courses",
+   "alimentation"
+  ],
+  "sansNom": true
+ },
+ "shop=convenience": {
+  "nom": "Épicerie",
+  "mots": [
+   "epicerie",
+   "superette",
+   "alimentation"
+  ],
+  "sansNom": true
+ },
+ "shop=frozen_food": {
+  "nom": "Surgelés"
+ },
+ "shop=organic": {
+  "nom": "Magasin bio",
+  "mots": [
+   "bio"
+  ]
+ },
+ "shop=farm": {
+  "nom": "Vente à la ferme",
+  "mots": [
+   "ferme",
+   "producteur"
+  ]
+ },
+ "shop=department_store": {
+  "nom": "Grand magasin"
+ },
+ "shop=mall": {
+  "nom": "Centre commercial",
+  "mots": [
+   "galerie marchande"
+  ]
+ },
+ "shop=general": {
+  "nom": "Bazar"
+ },
+ "shop=variety_store": {
+  "nom": "Bazar",
+  "mots": [
+   "discount"
+  ]
+ },
+ "shop=clothes": {
+  "nom": "Vêtements",
+  "mots": [
+   "habits",
+   "mode",
+   "pret a porter"
+  ]
+ },
+ "shop=shoes": {
+  "nom": "Chaussures",
+  "mots": [
+   "chaussure"
+  ]
+ },
+ "shop=bag": {
+  "nom": "Maroquinerie",
+  "mots": [
+   "sacs"
+  ]
+ },
+ "shop=jewelry": {
+  "nom": "Bijouterie",
+  "mots": [
+   "bijoux",
+   "bijoutier"
+  ]
+ },
+ "shop=watches": {
+  "nom": "Horlogerie",
+  "mots": [
+   "montres"
+  ]
+ },
+ "shop=boutique": {
+  "nom": "Boutique"
+ },
+ "shop=fashion_accessories": {
+  "nom": "Accessoires de mode"
+ },
+ "shop=second_hand": {
+  "nom": "Dépôt-vente",
+  "mots": [
+   "occasion",
+   "friperie"
+  ]
+ },
+ "shop=charity": {
+  "nom": "Boutique solidaire",
+  "mots": [
+   "occasion"
+  ]
+ },
+ "shop=hairdresser": {
+  "nom": "Coiffeur",
+  "mots": [
+   "coiffure",
+   "salon de coiffure"
+  ]
+ },
+ "shop=beauty": {
+  "nom": "Institut de beauté",
+  "mots": [
+   "esthetique",
+   "estheticienne"
+  ]
+ },
+ "shop=cosmetics": {
+  "nom": "Parfumerie",
+  "mots": [
+   "cosmetique",
+   "parfum"
+  ]
+ },
+ "shop=perfumery": {
+  "nom": "Parfumerie",
+  "mots": [
+   "parfum"
+  ]
+ },
+ "shop=massage": {
+  "nom": "Massage"
+ },
+ "shop=tattoo": {
+  "nom": "Tatouage",
+  "mots": [
+   "tatoueur"
+  ]
+ },
+ "shop=optician": {
+  "nom": "Opticien",
+  "mots": [
+   "lunettes",
+   "optique"
+  ],
+  "sansNom": true
+ },
+ "shop=hearing_aids": {
+  "nom": "Audioprothésiste",
+  "mots": [
+   "audition",
+   "appareil auditif"
+  ]
+ },
+ "shop=medical_supply": {
+  "nom": "Matériel médical"
+ },
+ "shop=chemist": {
+  "nom": "Droguerie",
+  "mots": [
+   "hygiene"
+  ]
+ },
+ "shop=florist": {
+  "nom": "Fleuriste",
+  "mots": [
+   "fleurs"
+  ]
+ },
+ "shop=garden_centre": {
+  "nom": "Jardinerie",
+  "mots": [
+   "jardin",
+   "plantes"
+  ]
+ },
+ "shop=doityourself": {
+  "nom": "Bricolage",
+  "mots": [
+   "magasin de bricolage"
+  ]
+ },
+ "shop=hardware": {
+  "nom": "Quincaillerie",
+  "mots": [
+   "outils"
+  ]
+ },
+ "shop=trade": {
+  "nom": "Négoce matériaux",
+  "mots": [
+   "materiaux",
+   "fournisseur",
+   "grossiste"
+  ]
+ },
+ "shop=electrical": {
+  "nom": "Matériel électrique",
+  "mots": [
+   "electricite",
+   "electricien"
+  ]
+ },
+ "shop=paint": {
+  "nom": "Peinture"
+ },
+ "shop=houseware": {
+  "nom": "Arts de la table",
+  "mots": [
+   "vaisselle",
+   "cuisine"
+  ]
+ },
+ "shop=furniture": {
+  "nom": "Meubles",
+  "mots": [
+   "ameublement",
+   "mobilier"
+  ]
+ },
+ "shop=kitchen": {
+  "nom": "Cuisiniste",
+  "mots": [
+   "cuisine"
+  ]
+ },
+ "shop=bed": {
+  "nom": "Literie",
+  "mots": [
+   "matelas"
+  ]
+ },
+ "shop=interior_decoration": {
+  "nom": "Décoration",
+  "mots": [
+   "deco"
+  ]
+ },
+ "shop=carpet": {
+  "nom": "Tapis"
+ },
+ "shop=curtain": {
+  "nom": "Rideaux"
+ },
+ "shop=lighting": {
+  "nom": "Luminaires",
+  "mots": [
+   "lampes"
+  ]
+ },
+ "shop=bathroom_furnishing": {
+  "nom": "Salle de bain"
+ },
+ "shop=tiles": {
+  "nom": "Carrelage"
+ },
+ "shop=flooring": {
+  "nom": "Revêtements de sol",
+  "mots": [
+   "parquet"
+  ]
+ },
+ "shop=glaziery": {
+  "nom": "Vitrerie",
+  "mots": [
+   "vitrier"
+  ]
+ },
+ "shop=locksmith": {
+  "nom": "Serrurier",
+  "mots": [
+   "serrurerie",
+   "cles"
+  ]
+ },
+ "shop=electronics": {
+  "nom": "Électronique",
+  "mots": [
+   "electromenager",
+   "high tech"
+  ]
+ },
+ "shop=appliance": {
+  "nom": "Électroménager",
+  "mots": [
+   "electromenager"
+  ]
+ },
+ "shop=computer": {
+  "nom": "Informatique",
+  "mots": [
+   "ordinateur"
+  ]
+ },
+ "shop=mobile_phone": {
+  "nom": "Téléphonie",
+  "mots": [
+   "telephone",
+   "portable"
+  ]
+ },
+ "shop=hifi": {
+  "nom": "Hi-fi"
+ },
+ "shop=camera": {
+  "nom": "Photo",
+  "mots": [
+   "appareil photo"
+  ]
+ },
+ "shop=video_games": {
+  "nom": "Jeux vidéo",
+  "mots": [
+   "jeux video"
+  ]
+ },
+ "shop=books": {
+  "nom": "Librairie",
+  "mots": [
+   "livres",
+   "libraire"
+  ]
+ },
+ "shop=newsagent": {
+  "nom": "Presse",
+  "mots": [
+   "journaux",
+   "tabac presse"
+  ]
+ },
+ "shop=stationery": {
+  "nom": "Papeterie",
+  "mots": [
+   "fournitures"
+  ]
+ },
+ "shop=copyshop": {
+  "nom": "Reprographie",
+  "mots": [
+   "photocopie",
+   "imprimerie"
+  ]
+ },
+ "shop=gift": {
+  "nom": "Cadeaux",
+  "mots": [
+   "souvenirs"
+  ]
+ },
+ "shop=toys": {
+  "nom": "Jouets",
+  "mots": [
+   "jouet"
+  ]
+ },
+ "shop=games": {
+  "nom": "Jeux de société",
+  "mots": [
+   "jeux"
+  ]
+ },
+ "shop=music": {
+  "nom": "Disquaire",
+  "mots": [
+   "musique",
+   "disques"
+  ]
+ },
+ "shop=musical_instrument": {
+  "nom": "Instruments de musique",
+  "mots": [
+   "musique"
+  ]
+ },
+ "shop=art": {
+  "nom": "Galerie d'art",
+  "mots": [
+   "art"
+  ]
+ },
+ "shop=frame": {
+  "nom": "Encadrement"
+ },
+ "shop=craft": {
+  "nom": "Loisirs créatifs"
+ },
+ "shop=fabric": {
+  "nom": "Tissus",
+  "mots": [
+   "mercerie"
+  ]
+ },
+ "shop=sewing": {
+  "nom": "Mercerie",
+  "mots": [
+   "couture"
+  ]
+ },
+ "shop=sports": {
+  "nom": "Articles de sport",
+  "mots": [
+   "sport"
+  ]
+ },
+ "shop=outdoor": {
+  "nom": "Équipement outdoor",
+  "mots": [
+   "randonnee",
+   "camping"
+  ]
+ },
+ "shop=bicycle": {
+  "nom": "Vélos",
+  "mots": [
+   "velo",
+   "cycles",
+   "reparation velo"
+  ]
+ },
+ "shop=fishing": {
+  "nom": "Pêche",
+  "mots": [
+   "peche"
+  ]
+ },
+ "shop=car": {
+  "nom": "Concessionnaire auto",
+  "mots": [
+   "voiture",
+   "garage",
+   "automobile"
+  ]
+ },
+ "shop=car_repair": {
+  "nom": "Garage auto",
+  "mots": [
+   "garage",
+   "mecanique",
+   "garagiste",
+   "reparation voiture"
+  ],
+  "sansNom": true
+ },
+ "shop=car_parts": {
+  "nom": "Pièces auto",
+  "mots": [
+   "accessoires auto"
+  ]
+ },
+ "shop=tyres": {
+  "nom": "Pneus",
+  "mots": [
+   "pneumatiques"
+  ]
+ },
+ "shop=motorcycle": {
+  "nom": "Motos",
+  "mots": [
+   "moto",
+   "scooter"
+  ]
+ },
+ "shop=pet": {
+  "nom": "Animalerie",
+  "mots": [
+   "animaux"
+  ]
+ },
+ "shop=pet_grooming": {
+  "nom": "Toilettage",
+  "mots": [
+   "toiletteur",
+   "chien"
+  ]
+ },
+ "shop=tobacco": {
+  "nom": "Tabac",
+  "mots": [
+   "bureau de tabac",
+   "cigarettes"
+  ],
+  "sansNom": true
+ },
+ "shop=e-cigarette": {
+  "nom": "Cigarette électronique",
+  "mots": [
+   "vape",
+   "vapoteuse"
+  ]
+ },
+ "shop=laundry": {
+  "nom": "Laverie",
+  "mots": [
+   "lavomatic"
+  ]
+ },
+ "shop=dry_cleaning": {
+  "nom": "Pressing",
+  "mots": [
+   "nettoyage"
+  ]
+ },
+ "shop=funeral_directors": {
+  "nom": "Pompes funèbres",
+  "mots": [
+   "funerarium"
+  ]
+ },
+ "shop=travel_agency": {
+  "nom": "Agence de voyages",
+  "mots": [
+   "voyage"
+  ]
+ },
+ "shop=estate_agent": {
+  "nom": "Agence immobilière",
+  "mots": [
+   "immobilier"
+  ]
+ },
+ "shop=insurance": {
+  "nom": "Assurance",
+  "mots": [
+   "assureur"
+  ]
+ },
+ "shop=pawnbroker": {
+  "nom": "Prêteur sur gages"
+ },
+ "shop=money_lender": {
+  "nom": "Crédit"
+ },
+ "shop=storage_rental": {
+  "nom": "Garde-meubles",
+  "mots": [
+   "stockage"
+  ]
+ },
+ "shop=rental": {
+  "nom": "Location"
+ },
+ "shop=repair": {
+  "nom": "Réparation"
+ },
+ "shop=tailor": {
+  "nom": "Retouches",
+  "mots": [
+   "couturier"
+  ]
+ },
+ "shop=lottery": {
+  "nom": "Loterie",
+  "mots": [
+   "loto",
+   "fdj"
+  ]
+ },
+ "shop=baby_goods": {
+  "nom": "Puériculture",
+  "mots": [
+   "bebe"
+  ]
+ },
+ "shop=nutrition_supplements": {
+  "nom": "Compléments alimentaires"
+ },
+ "shop=herbalist": {
+  "nom": "Herboristerie"
+ },
+ "shop=health_food": {
+  "nom": "Diététique"
+ },
+ "shop=photo": {
+  "nom": "Photographe",
+  "mots": [
+   "photo"
+  ]
+ },
+ "shop=kiosk": {
+  "nom": "Kiosque"
+ },
+ "shop=wholesale": {
+  "nom": "Grossiste"
+ },
+ "amenity=pharmacy": {
+  "nom": "Pharmacie",
+  "mots": [
+   "pharmacien",
+   "medicaments"
+  ],
+  "sansNom": true
+ },
+ "amenity=hospital": {
+  "nom": "Hôpital",
+  "mots": [
+   "hopital",
+   "urgences",
+   "clinique"
+  ],
+  "sansNom": true
+ },
+ "amenity=clinic": {
+  "nom": "Clinique",
+  "mots": [
+   "centre medical"
+  ]
+ },
+ "amenity=doctors": {
+  "nom": "Médecin",
+  "mots": [
+   "docteur",
+   "cabinet medical",
+   "generaliste"
+  ]
+ },
+ "amenity=dentist": {
+  "nom": "Dentiste",
+  "mots": [
+   "dentaire"
+  ]
+ },
+ "amenity=veterinary": {
+  "nom": "Vétérinaire",
+  "mots": [
+   "veto",
+   "clinique veterinaire"
+  ]
+ },
+ "amenity=nursing_home": {
+  "nom": "Maison de retraite",
+  "mots": [
+   "ehpad"
+  ]
+ },
+ "amenity=social_facility": {
+  "nom": "Service social"
+ },
+ "amenity=townhall": {
+  "nom": "Mairie",
+  "mots": [
+   "hotel de ville",
+   "mairie annexe"
+  ],
+  "sansNom": true
+ },
+ "amenity=courthouse": {
+  "nom": "Tribunal",
+  "mots": [
+   "palais de justice",
+   "justice"
+  ]
+ },
+ "amenity=police": {
+  "nom": "Police",
+  "mots": [
+   "commissariat",
+   "gendarmerie"
+  ],
+  "sansNom": true
+ },
+ "amenity=fire_station": {
+  "nom": "Pompiers",
+  "mots": [
+   "caserne",
+   "sdis"
+  ]
+ },
+ "amenity=post_office": {
+  "nom": "Bureau de poste",
+  "mots": [
+   "poste",
+   "la poste"
+  ],
+  "sansNom": true
+ },
+ "amenity=post_box": {
+  "nom": "Boîte aux lettres",
+  "mots": [
+   "boite aux lettres"
+  ]
+ },
+ "amenity=bank": {
+  "nom": "Banque"
+ },
+ "amenity=atm": {
+  "nom": "Distributeur de billets",
+  "mots": [
+   "dab",
+   "distributeur",
+   "retrait"
+  ],
+  "sansNom": true
+ },
+ "amenity=bureau_de_change": {
+  "nom": "Bureau de change"
+ },
+ "amenity=library": {
+  "nom": "Bibliothèque",
+  "mots": [
+   "mediatheque"
+  ]
+ },
+ "amenity=school": {
+  "nom": "École",
+  "mots": [
+   "ecole",
+   "college",
+   "lycee",
+   "scolaire"
+  ]
+ },
+ "amenity=kindergarten": {
+  "nom": "École maternelle",
+  "mots": [
+   "maternelle",
+   "creche"
+  ]
+ },
+ "amenity=childcare": {
+  "nom": "Crèche",
+  "mots": [
+   "garderie",
+   "creche",
+   "assistante maternelle"
+  ]
+ },
+ "amenity=college": {
+  "nom": "Lycée / enseignement supérieur",
+  "mots": [
+   "lycee"
+  ]
+ },
+ "amenity=university": {
+  "nom": "Université",
+  "mots": [
+   "universite",
+   "fac",
+   "faculte"
+  ]
+ },
+ "amenity=driving_school": {
+  "nom": "Auto-école",
+  "mots": [
+   "auto ecole",
+   "permis"
+  ]
+ },
+ "amenity=music_school": {
+  "nom": "École de musique",
+  "mots": [
+   "conservatoire"
+  ]
+ },
+ "amenity=language_school": {
+  "nom": "École de langues"
+ },
+ "amenity=prep_school": {
+  "nom": "Soutien scolaire"
+ },
+ "amenity=community_centre": {
+  "nom": "Centre social",
+  "mots": [
+   "salle des fetes",
+   "maison de quartier"
+  ]
+ },
+ "amenity=social_centre": {
+  "nom": "Centre social"
+ },
+ "amenity=arts_centre": {
+  "nom": "Centre culturel",
+  "mots": [
+   "culture"
+  ]
+ },
+ "amenity=theatre": {
+  "nom": "Théâtre",
+  "mots": [
+   "theatre",
+   "spectacle"
+  ]
+ },
+ "amenity=cinema": {
+  "nom": "Cinéma",
+  "mots": [
+   "cinema",
+   "film"
+  ]
+ },
+ "amenity=nightclub": {
+  "nom": "Discothèque",
+  "mots": [
+   "boite de nuit"
+  ]
+ },
+ "amenity=casino": {
+  "nom": "Casino"
+ },
+ "amenity=events_venue": {
+  "nom": "Salle d'événements",
+  "mots": [
+   "salle de reception"
+  ]
+ },
+ "amenity=conference_centre": {
+  "nom": "Centre de congrès",
+  "mots": [
+   "congres"
+  ]
+ },
+ "amenity=exhibition_centre": {
+  "nom": "Parc des expositions",
+  "mots": [
+   "expo"
+  ]
+ },
+ "amenity=place_of_worship": {
+  "nom": "Lieu de culte",
+  "mots": [
+   "eglise",
+   "mosquee",
+   "synagogue",
+   "temple",
+   "chapelle"
+  ]
+ },
+ "amenity=restaurant": {
+  "nom": "Restaurant",
+  "mots": [
+   "resto",
+   "manger"
+  ]
+ },
+ "amenity=fast_food": {
+  "nom": "Restauration rapide",
+  "mots": [
+   "fast food",
+   "snack",
+   "kebab",
+   "burger"
+  ]
+ },
+ "amenity=cafe": {
+  "nom": "Café",
+  "mots": [
+   "bar",
+   "salon de the"
+  ]
+ },
+ "amenity=bar": {
+  "nom": "Bar",
+  "mots": [
+   "cafe"
+  ]
+ },
+ "amenity=pub": {
+  "nom": "Pub",
+  "mots": [
+   "bar"
+  ]
+ },
+ "amenity=biergarten": {
+  "nom": "Bar"
+ },
+ "amenity=ice_cream": {
+  "nom": "Glacier",
+  "mots": [
+   "glace"
+  ]
+ },
+ "amenity=food_court": {
+  "nom": "Aire de restauration"
+ },
+ "amenity=fuel": {
+  "nom": "Station-service",
+  "mots": [
+   "essence",
+   "carburant",
+   "station essence",
+   "gasoil",
+   "gazole"
+  ],
+  "sansNom": true
+ },
+ "amenity=charging_station": {
+  "nom": "Borne de recharge",
+  "mots": [
+   "recharge",
+   "electrique",
+   "borne electrique"
+  ],
+  "sansNom": true
+ },
+ "amenity=car_wash": {
+  "nom": "Lavage auto",
+  "mots": [
+   "station de lavage",
+   "lavage voiture"
+  ],
+  "sansNom": true
+ },
+ "amenity=car_rental": {
+  "nom": "Location de voitures",
+  "mots": [
+   "location voiture"
+  ]
+ },
+ "amenity=parking": {
+  "nom": "Parking",
+  "mots": [
+   "stationnement"
+  ]
+ },
+ "amenity=motorcycle_parking": {
+  "nom": "Parking moto"
+ },
+ "amenity=taxi": {
+  "nom": "Station de taxis",
+  "mots": [
+   "taxi"
+  ]
+ },
+ "amenity=bus_station": {
+  "nom": "Gare routière",
+  "mots": [
+   "bus",
+   "autocar"
+  ]
+ },
+ "amenity=ferry_terminal": {
+  "nom": "Embarcadère",
+  "mots": [
+   "bateau",
+   "batcub",
+   "navette fluviale"
+  ]
+ },
+ "amenity=toilets": {
+  "nom": "Toilettes",
+  "mots": [
+   "wc"
+  ]
+ },
+ "amenity=drinking_water": {
+  "nom": "Point d'eau",
+  "mots": [
+   "fontaine"
+  ]
+ },
+ "amenity=recycling": {
+  "nom": "Point de recyclage",
+  "mots": [
+   "tri",
+   "recyclage"
+  ]
+ },
+ "amenity=waste_disposal": {
+  "nom": "Déchets"
+ },
+ "amenity=marketplace": {
+  "nom": "Marché",
+  "mots": [
+   "halle",
+   "marche"
+  ]
+ },
+ "amenity=vehicle_inspection": {
+  "nom": "Contrôle technique",
+  "mots": [
+   "controle technique"
+  ],
+  "sansNom": true
+ },
+ "amenity=funeral_hall": {
+  "nom": "Funérarium"
+ },
+ "amenity=crematorium": {
+  "nom": "Crématorium"
+ },
+ "amenity=grave_yard": {
+  "nom": "Cimetière",
+  "mots": [
+   "cimetiere"
+  ]
+ },
+ "amenity=public_bookcase": {
+  "nom": "Boîte à livres"
+ },
+ "amenity=dojo": {
+  "nom": "Dojo",
+  "mots": [
+   "arts martiaux"
+  ]
+ },
+ "amenity=animal_shelter": {
+  "nom": "Refuge pour animaux",
+  "mots": [
+   "spa"
+  ]
+ },
+ "amenity=coworking_space": {
+  "nom": "Coworking"
+ },
+ "amenity=studio": {
+  "nom": "Studio"
+ },
+ "office=government": {
+  "nom": "Administration",
+  "mots": [
+   "service public"
+  ]
+ },
+ "office=employment_agency": {
+  "nom": "Agence pour l'emploi",
+  "mots": [
+   "emploi",
+   "interim"
+  ]
+ },
+ "office=insurance": {
+  "nom": "Assurance",
+  "mots": [
+   "assureur"
+  ]
+ },
+ "office=estate_agent": {
+  "nom": "Agence immobilière",
+  "mots": [
+   "immobilier"
+  ]
+ },
+ "office=lawyer": {
+  "nom": "Avocat",
+  "mots": [
+   "cabinet d avocats"
+  ]
+ },
+ "office=notary": {
+  "nom": "Notaire",
+  "mots": [
+   "etude notariale"
+  ]
+ },
+ "office=accountant": {
+  "nom": "Expert-comptable",
+  "mots": [
+   "comptable"
+  ]
+ },
+ "office=tax_advisor": {
+  "nom": "Conseiller fiscal"
+ },
+ "office=association": {
+  "nom": "Association"
+ },
+ "office=company": {
+  "nom": "Entreprise",
+  "mots": [
+   "societe"
+  ]
+ },
+ "office=it": {
+  "nom": "Informatique (entreprise)"
+ },
+ "office=architect": {
+  "nom": "Architecte"
+ },
+ "office=telecommunication": {
+  "nom": "Télécommunications"
+ },
+ "office=energy_supplier": {
+  "nom": "Fournisseur d'énergie",
+  "mots": [
+   "electricite",
+   "gaz"
+  ]
+ },
+ "office=water_utility": {
+  "nom": "Eau"
+ },
+ "office=educational_institution": {
+  "nom": "Établissement d'enseignement"
+ },
+ "office=political_party": {
+  "nom": "Parti politique"
+ },
+ "office=ngo": {
+  "nom": "Association"
+ },
+ "office=union": {
+  "nom": "Syndicat"
+ },
+ "office=travel_agent": {
+  "nom": "Agence de voyages"
+ },
+ "office=financial": {
+  "nom": "Finance"
+ },
+ "office=physician": {
+  "nom": "Médecin",
+  "mots": [
+   "docteur"
+  ]
+ },
+ "office=therapist": {
+  "nom": "Thérapeute"
+ },
+ "office=diplomatic": {
+  "nom": "Consulat",
+  "mots": [
+   "ambassade"
+  ]
+ },
+ "healthcare=laboratory": {
+  "nom": "Laboratoire d'analyses",
+  "mots": [
+   "analyses",
+   "prise de sang",
+   "labo"
+  ]
+ },
+ "healthcare=physiotherapist": {
+  "nom": "Kinésithérapeute",
+  "mots": [
+   "kine"
+  ]
+ },
+ "healthcare=nurse": {
+  "nom": "Infirmier",
+  "mots": [
+   "infirmiere",
+   "soins"
+  ]
+ },
+ "healthcare=psychotherapist": {
+  "nom": "Psychologue",
+  "mots": [
+   "psy"
+  ]
+ },
+ "healthcare=podiatrist": {
+  "nom": "Pédicure-podologue",
+  "mots": [
+   "podologue"
+  ]
+ },
+ "healthcare=optometrist": {
+  "nom": "Optométriste"
+ },
+ "healthcare=speech_therapist": {
+  "nom": "Orthophoniste"
+ },
+ "healthcare=midwife": {
+  "nom": "Sage-femme"
+ },
+ "healthcare=radiology": {
+  "nom": "Radiologie",
+  "mots": [
+   "radio",
+   "imagerie",
+   "irm",
+   "scanner"
+  ]
+ },
+ "healthcare=centre": {
+  "nom": "Centre de santé",
+  "mots": [
+   "centre medical"
+  ]
+ },
+ "healthcare=rehabilitation": {
+  "nom": "Rééducation"
+ },
+ "healthcare=blood_donation": {
+  "nom": "Don du sang",
+  "mots": [
+   "efs"
+  ]
+ },
+ "healthcare=alternative": {
+  "nom": "Médecine douce",
+  "mots": [
+   "osteopathe"
+  ]
+ },
+ "healthcare=audiologist": {
+  "nom": "Audioprothésiste"
+ },
+ "healthcare=sample_collection": {
+  "nom": "Prélèvements",
+  "mots": [
+   "prise de sang"
+  ]
+ },
+ "tourism=museum": {
+  "nom": "Musée",
+  "mots": [
+   "musee",
+   "exposition"
+  ]
+ },
+ "tourism=gallery": {
+  "nom": "Galerie d'art",
+  "mots": [
+   "exposition"
+  ]
+ },
+ "tourism=attraction": {
+  "nom": "Site touristique",
+  "mots": [
+   "a voir",
+   "monument"
+  ]
+ },
+ "tourism=viewpoint": {
+  "nom": "Point de vue",
+  "mots": [
+   "panorama"
+  ]
+ },
+ "tourism=artwork": {
+  "nom": "Œuvre d'art",
+  "mots": [
+   "oeuvre",
+   "sculpture",
+   "statue"
+  ]
+ },
+ "tourism=hotel": {
+  "nom": "Hôtel",
+  "mots": [
+   "hotel"
+  ]
+ },
+ "tourism=motel": {
+  "nom": "Motel",
+  "mots": [
+   "hotel"
+  ]
+ },
+ "tourism=guest_house": {
+  "nom": "Chambre d'hôtes",
+  "mots": [
+   "chambres d hotes"
+  ]
+ },
+ "tourism=hostel": {
+  "nom": "Auberge de jeunesse"
+ },
+ "tourism=apartment": {
+  "nom": "Location saisonnière"
+ },
+ "tourism=chalet": {
+  "nom": "Gîte",
+  "mots": [
+   "gite"
+  ]
+ },
+ "tourism=camp_site": {
+  "nom": "Camping",
+  "mots": [
+   "campings"
+  ]
+ },
+ "tourism=caravan_site": {
+  "nom": "Aire de camping-cars",
+  "mots": [
+   "camping car"
+  ]
+ },
+ "tourism=information": {
+  "nom": "Office de tourisme",
+  "mots": [
+   "tourisme",
+   "informations"
+  ]
+ },
+ "tourism=zoo": {
+  "nom": "Zoo",
+  "mots": [
+   "animaux"
+  ]
+ },
+ "tourism=aquarium": {
+  "nom": "Aquarium"
+ },
+ "tourism=theme_park": {
+  "nom": "Parc d'attractions"
+ },
+ "tourism=picnic_site": {
+  "nom": "Aire de pique-nique",
+  "mots": [
+   "pique nique"
+  ]
+ },
+ "tourism=wine_cellar": {
+  "nom": "Chai",
+  "mots": [
+   "vin",
+   "chateau",
+   "degustation"
+  ]
+ },
+ "leisure=park": {
+  "nom": "Parc",
+  "mots": [
+   "jardin public",
+   "square"
+  ]
+ },
+ "leisure=garden": {
+  "nom": "Jardin",
+  "mots": [
+   "jardin public"
+  ]
+ },
+ "leisure=playground": {
+  "nom": "Aire de jeux",
+  "mots": [
+   "jeux enfants"
+  ]
+ },
+ "leisure=sports_centre": {
+  "nom": "Centre sportif",
+  "mots": [
+   "salle de sport",
+   "gymnase"
+  ]
+ },
+ "leisure=fitness_centre": {
+  "nom": "Salle de sport",
+  "mots": [
+   "fitness",
+   "musculation"
+  ]
+ },
+ "leisure=swimming_pool": {
+  "nom": "Piscine",
+  "mots": [
+   "natation"
+  ]
+ },
+ "leisure=water_park": {
+  "nom": "Parc aquatique",
+  "mots": [
+   "piscine"
+  ]
+ },
+ "leisure=stadium": {
+  "nom": "Stade"
+ },
+ "leisure=pitch": {
+  "nom": "Terrain de sport",
+  "mots": [
+   "terrain",
+   "foot",
+   "tennis"
+  ]
+ },
+ "leisure=sports_hall": {
+  "nom": "Gymnase",
+  "mots": [
+   "salle de sport"
+  ]
+ },
+ "leisure=golf_course": {
+  "nom": "Golf"
+ },
+ "leisure=ice_rink": {
+  "nom": "Patinoire"
+ },
+ "leisure=bowling_alley": {
+  "nom": "Bowling"
+ },
+ "leisure=escape_game": {
+  "nom": "Escape game"
+ },
+ "leisure=amusement_arcade": {
+  "nom": "Salle de jeux"
+ },
+ "leisure=marina": {
+  "nom": "Port de plaisance",
+  "mots": [
+   "port"
+  ]
+ },
+ "leisure=nature_reserve": {
+  "nom": "Réserve naturelle"
+ },
+ "leisure=horse_riding": {
+  "nom": "Centre équestre",
+  "mots": [
+   "equitation",
+   "poney"
+  ]
+ },
+ "leisure=dance": {
+  "nom": "École de danse",
+  "mots": [
+   "danse"
+  ]
+ },
+ "leisure=hackerspace": {
+  "nom": "Fablab"
+ },
+ "leisure=resort": {
+  "nom": "Village vacances"
+ },
+ "leisure=beach_resort": {
+  "nom": "Plage"
+ },
+ "leisure=dog_park": {
+  "nom": "Parc à chiens",
+  "mots": [
+   "chien"
+  ]
+ },
+ "craft=electrician": {
+  "nom": "Électricien",
+  "mots": [
+   "electricite"
+  ]
+ },
+ "craft=plumber": {
+  "nom": "Plombier",
+  "mots": [
+   "plomberie"
+  ]
+ },
+ "craft=carpenter": {
+  "nom": "Menuisier",
+  "mots": [
+   "menuiserie",
+   "charpentier"
+  ]
+ },
+ "craft=painter": {
+  "nom": "Peintre en bâtiment",
+  "mots": [
+   "peinture"
+  ]
+ },
+ "craft=roofer": {
+  "nom": "Couvreur",
+  "mots": [
+   "toiture"
+  ]
+ },
+ "craft=builder": {
+  "nom": "Maçon",
+  "mots": [
+   "maconnerie",
+   "construction"
+  ]
+ },
+ "craft=hvac": {
+  "nom": "Chauffagiste",
+  "mots": [
+   "chauffage",
+   "climatisation"
+  ]
+ },
+ "craft=locksmith": {
+  "nom": "Serrurier"
+ },
+ "craft=glaziery": {
+  "nom": "Vitrier"
+ },
+ "craft=tiler": {
+  "nom": "Carreleur"
+ },
+ "craft=gardener": {
+  "nom": "Paysagiste",
+  "mots": [
+   "jardinier"
+  ]
+ },
+ "craft=winery": {
+  "nom": "Domaine viticole",
+  "mots": [
+   "vin",
+   "chateau"
+  ]
+ },
+ "craft=brewery": {
+  "nom": "Brasserie",
+  "mots": [
+   "biere"
+  ]
+ },
+ "craft=confectionery": {
+  "nom": "Confiserie"
+ },
+ "craft=caterer": {
+  "nom": "Traiteur"
+ },
+ "craft=photographer": {
+  "nom": "Photographe"
+ },
+ "craft=shoemaker": {
+  "nom": "Cordonnier",
+  "mots": [
+   "cordonnerie"
+  ]
+ },
+ "craft=key_cutter": {
+  "nom": "Clés",
+  "mots": [
+   "double de cles"
+  ]
+ },
+ "craft=tailor": {
+  "nom": "Couturier",
+  "mots": [
+   "retouches"
+  ]
+ },
+ "craft=upholsterer": {
+  "nom": "Tapissier"
+ },
+ "craft=blacksmith": {
+  "nom": "Ferronnier",
+  "mots": [
+   "metallerie"
+  ]
+ },
+ "craft=metal_construction": {
+  "nom": "Métallerie"
+ },
+ "craft=window_construction": {
+  "nom": "Menuiserie"
+ },
+ "craft=stonemason": {
+  "nom": "Tailleur de pierre"
+ },
+ "craft=jeweller": {
+  "nom": "Bijoutier"
+ },
+ "craft=cleaning": {
+  "nom": "Nettoyage"
+ },
+ "craft=dressmaker": {
+  "nom": "Couturière"
+ },
+ "craft=handicraft": {
+  "nom": "Artisanat"
+ },
+ "craft=print_shop": {
+  "nom": "Imprimerie"
+ },
+ "craft=sawmill": {
+  "nom": "Scierie"
+ },
+ "historic=castle": {
+  "nom": "Château",
+  "mots": [
+   "chateau"
+  ]
+ },
+ "historic=monument": {
+  "nom": "Monument"
+ },
+ "historic=memorial": {
+  "nom": "Monument commémoratif",
+  "mots": [
+   "monument aux morts"
+  ]
+ },
+ "historic=church": {
+  "nom": "Église",
+  "mots": [
+   "eglise"
+  ]
+ },
+ "historic=building": {
+  "nom": "Bâtiment historique"
+ },
+ "historic=ruins": {
+  "nom": "Ruines"
+ },
+ "historic=archaeological_site": {
+  "nom": "Site archéologique"
+ },
+ "historic=fort": {
+  "nom": "Fort"
+ },
+ "historic=city_gate": {
+  "nom": "Porte de ville",
+  "mots": [
+   "porte"
+  ]
+ },
+ "historic=manor": {
+  "nom": "Manoir"
+ },
+ "historic=tower": {
+  "nom": "Tour"
+ },
+ "historic=lighthouse": {
+  "nom": "Phare"
+ },
+ "railway=station": {
+  "nom": "Gare",
+  "mots": [
+   "gare sncf",
+   "train"
+  ]
+ },
+ "railway=halt": {
+  "nom": "Gare",
+  "mots": [
+   "train",
+   "halte"
+  ]
+ },
+ "railway=tram_stop": {
+  "nom": "Arrêt de tram",
+  "mots": [
+   "tram",
+   "tbm"
+  ]
+ },
+ "aeroway=aerodrome": {
+  "nom": "Aéroport",
+  "mots": [
+   "aeroport",
+   "avion"
+  ]
+ },
+ "government=prefecture": {
+  "nom": "Préfecture",
+  "mots": [
+   "prefecture",
+   "sous prefecture"
+  ]
+ },
+ "government=social_security": {
+  "nom": "Sécurité sociale",
+  "mots": [
+   "secu",
+   "securite sociale"
+  ]
+ },
+ "government=employment_agency": {
+  "nom": "Agence pour l'emploi",
+  "mots": [
+   "emploi"
+  ]
+ },
+ "government=tax": {
+  "nom": "Impôts",
+  "mots": [
+   "impots",
+   "finances publiques"
+  ]
+ },
+ "government=healthcare": {
+  "nom": "Santé (administration)"
+ },
+ "government=public_service": {
+  "nom": "Service public",
+  "mots": [
+   "administration"
+  ]
+ },
+ "office=quango": {
+  "nom": "Organisme public",
+  "mots": [
+   "administration"
+  ]
+ },
+ "healthcare=doctor": {
+  "nom": "Médecin",
+  "mots": [
+   "docteur",
+   "cabinet medical",
+   "generaliste"
+  ]
+ },
+ "amenity=parking_entrance": {
+  "nom": "Entrée de parking",
+  "mots": [
+   "parking"
+  ]
+ }
+}

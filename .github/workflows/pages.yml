@@ -1,26 +1,83 @@
-# Mise en ligne automatique sur GitHub Pages à chaque modification de la branche main
+# Mise en ligne automatique sur GitHub Pages.
+# - à chaque modification de la branche main ;
+# - chaque lundi matin : on refait aussi le fichier des lieux (OpenStreetMap) pour la recherche.
+# Le fichier des lieux est rangé dans la « release » GitHub nommée « donnees »
+# (pour ne pas alourdir l'historique du projet), puis publié avec l'appli.
 name: Mise en ligne
 
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '17 3 * * 1'   # chaque lundi à 3 h 17 (heure de Londres)
   workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+    inputs:
+      refaire_donnees:
+        description: "Refaire le fichier des lieux maintenant"
+        type: boolean
+        default: false
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  publier:
+  donnees:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Faut-il refaire le fichier des lieux ?
+        id: besoin
+        run: |
+          refaire=non
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.refaire_donnees }}" = "true" ]; then
+            refaire=oui
+          elif ! gh release view donnees --json assets -q '.assets[].name' 2>/dev/null | grep -qx lieux.json; then
+            refaire=oui   # pas encore de fichier
+          elif [ "${{ github.event_name }}" = "push" ] && git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" 2>/dev/null | grep -qE '^(scripts/preparer_lieux.py|listes/categories.json)$'; then
+            refaire=oui   # la préparation a changé
+          fi
+          echo "refaire=$refaire" >> "$GITHUB_OUTPUT"
+          echo "Refaire le fichier des lieux : $refaire"
+
+      - name: Préparer le fichier des lieux (OpenStreetMap)
+        if: steps.besoin.outputs.refaire == 'oui'
+        run: python3 scripts/preparer_lieux.py
+
+      - name: Reprendre le fichier des lieux existant
+        if: steps.besoin.outputs.refaire != 'oui'
+        run: gh release download donnees -p lieux.json -D donnees
+
+      - name: Tester la recherche avec des exemples réels
+        run: node scripts/tester_recherche.js donnees/lieux.json
+
+      - name: Ranger le nouveau fichier dans la release « donnees »
+        if: steps.besoin.outputs.refaire == 'oui'
+        run: |
+          gh release view donnees >/dev/null 2>&1 || gh release create donnees --title "Données de l'appli" --notes "Fichiers préparés automatiquement (lieux OpenStreetMap de la Gironde). Ne pas supprimer." --latest=false
+          gh release upload donnees donnees/lieux.json --clobber
+
+  publier:
+    needs: donnees
+    # On publie même si le fichier des lieux n'a pas pu être refait (l'ancien est repris)
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deploiement.outputs.page_url }}
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       # GitHub Pages doit avoir été activé une fois : Settings › Pages › Source : « GitHub Actions »
@@ -28,8 +85,10 @@ jobs:
       # On publie uniquement les fichiers de l'appli
       - name: Préparer le site
         run: |
-          mkdir _site
-          cp -r index.html style.css app.js rapports.js sw.js manifest.webmanifest icons vendor _site/
+          mkdir -p _site/donnees
+          cp -r index.html style.css app.js rapports.js moteur-recherche.js horaires.js recherche.js sw.js manifest.webmanifest icons vendor listes _site/
+          gh release download donnees -p lieux.json -D _site/donnees || echo "Fichier des lieux pas encore disponible"
+          ls -la _site _site/donnees
       - uses: actions/upload-pages-artifact@v3
       - id: deploiement
         uses: actions/deploy-pages@v4
