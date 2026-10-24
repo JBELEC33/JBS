@@ -156,6 +156,9 @@ L'interface est aussi importante que le calcul. Elle doit se comporter comme les
   - La simulation est dans `navigation.js` ; à la fin d'une simulation, le point revient à la dernière vraie position GPS.
 - Les tests de `scripts/tester_itineraire.js` affichent aussi les consignes de chaque trajet.
 
+### Appui long sur la carte (ajout du 24/10/2026, version 5.2)
+- `appui-long.js` : garder le doigt ~0,6 s sur la carte (écran carte ou aperçu, jamais pendant la navigation) pose un repère, affiche la rue la plus proche (trouvée dans le fichier des rues, sur le téléphone, sans envoi sur internet) et la distance, avec « Y aller » (ouvre l'aperçu du trajet) ou « Annuler ». Le geste est annulé si le doigt bouge de plus de 10 px ou si deux doigts touchent l'écran.
+
 ### Travaux (étape 5)
 - **Décision du 24/10/2026 : on fait sans TomTom.** Ne pas brancher TomTom (ni autre service en ligne de trafic) sans nouvel accord de l'utilisatrice et sans vérifier la licence.
 - `scripts/preparer_travaux.py` (Python standard) : télécharge `ci_chantier`, garde les chantiers non terminés, classe l'effet : **« ferme »** (circulation interdite, mise en impasse, interruption, sens interdit), **« ralenti »** (circulation alternée, rétrécissement, neutralisation de voie, limitation de vitesse, circulation inversée), **« info »** (stationnement…) ; écrit `donnees/travaux.json` (≈ 120 Ko). Lancé chaque nuit (cron `47 4 * * *` dans `pages.yml`) et à chaque mise en ligne ; en cas d'échec, l'ancien fichier (release « donnees ») est repris.

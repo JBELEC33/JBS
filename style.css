@@ -615,3 +615,7 @@ body.en-navigation #bouton-bloque { display: none !important; }
 .fiche-travaux-dates { color: #ffc27a; }
 .fiche-travaux-source { color: var(--texte-doux); font-size: 13px; }
 .fiche-travaux-bouton { margin-top: 8px; height: 44px; font-size: 15px; }
+
+/* Appui long : pas de menu « copier » d'iOS sur la carte */
+#carte { -webkit-touch-callout: none; }
+#panneau-point { z-index: 24; }

@@ -267,5 +267,5 @@ const Itineraire = (() => {
     if (destination && etat.ecran === 'apercu') apercu(destination);
   }
 
-  return { installer, apercu, charger, recalculer, terminer, recalculerApercu };
+  return { installer, apercu, charger, recalculer, terminer, recalculerApercu, reseau: () => reseau };
 })();

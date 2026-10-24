@@ -150,6 +150,17 @@
     <div id="signalement-maj" class="recherche-info"></div>
   </div>
 
+  <!-- Appui long sur la carte : « Aller ici ? » -->
+  <div id="panneau-point" class="panneau-signalement cache">
+    <h2>Aller ici ?</h2>
+    <div id="point-rue" class="signalement-rue"></div>
+    <div id="point-distance" class="trajet-details"></div>
+    <div class="ligne-boutons">
+      <button id="point-annuler" class="bouton bouton-secondaire">Annuler</button>
+      <button id="point-y-aller" class="bouton bouton-principal">Y aller</button>
+    </div>
+  </div>
+
   <!-- Petite confirmation avant d'arrêter le trajet -->
   <div id="confirmation-arret" class="panneau cache">
     <div class="panneau-contenu confirmation">
@@ -202,6 +213,7 @@
   <script src="consignes.js"></script>
   <script src="navigation.js"></script>
   <script src="travaux.js"></script>
+  <script src="appui-long.js"></script>
   <script src="rapports.js"></script>
   <script src="app.js"></script>
 </body>
