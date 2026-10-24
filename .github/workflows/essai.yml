@@ -1,0 +1,21 @@
+# Essai temporaire (sera supprimé) : récupère les styles de carte OpenFreeMap pour les étudier
+name: Essai
+on:
+  push:
+    branches: [claude/keen-bell-077ud9]
+permissions:
+  contents: write
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p resultats
+          for s in liberty dark positron bright fiord; do curl -sf https://tiles.openfreemap.org/styles/$s -o resultats/$s.json || echo "pas de style $s"; done
+          ls -la resultats
+          git config user.name essai; git config user.email essai@example.com
+          git checkout -b essai-resultats
+          git add -f resultats
+          git commit -qm "Résultats de l'essai"
+          git push -f origin essai-resultats
